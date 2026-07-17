@@ -117,15 +117,11 @@ stores security analyses to Sec-Track.
 
 ## Contributing & Feedback
 
-We welcome bug reports, feature ideas, benchmarks, and vulnerability disclosures — see
-[`CONTRIBUTING.md`](CONTRIBUTING.md) for the full guide. In short:
+We welcome bug reports, feature ideas, and vulnerability disclosures — see
+[`CONTRIBUTING.md`](CONTRIBUTING.md) for details. In short:
 
 - **Found a bug or a wrong result?** Open an issue on the relevant component repository (or on
-  this hub) with a reproducer. In the Product Layer, the agent (Pika) generates, tests, and
-  merges the fix — so file an issue rather than hand-editing product code.
-- **Want to contribute?** Three paths: users report issues; domain scientists add benchmarks &
-  validation workflows to [CC-Test](https://github.com/a85tract/CESM-CC-Test); agentic-system
-  developers extend Pika.
+  this hub) with a reproducer.
 - **Security vulnerability?** Please **do not** open a public issue — use a private GitHub
   security advisory or email the PI (responsible disclosure).
 - **Questions or collaboration?** Contact the Lead PI, **Yueqi Chen** (University of Colorado
