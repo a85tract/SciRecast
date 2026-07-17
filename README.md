@@ -40,7 +40,7 @@ flowchart TB
         JaxCAM6["JaxCAM6"]
     end
     subgraph Support["🟩 Support Layer — Validation &amp; Security Infrastructure"]
-        NCTest["NC-Test"]
+        NCTest["CC-Test"]
         SecTrack["Sec-Track"]
     end
     subgraph Core["🟥 Core Layer — Pika: multi-LLM-agent modernization engine"]
@@ -88,7 +88,7 @@ The trust foundation. Human contributors extend these; the agent consumes them a
 
 | Component | Repository | Description | Status |
 |---|---|---|---|
-| **NC-Test** *(Numerical & Cyber Test)* | [`CESM-NC-Test`](https://github.com/a85tract/CESM-NC-Test) | A **CI/CD validation workflow** covering both **Cyber** (security) and **Numerical** (correctness) testing of modernized software. Its Cyber half is built today — a reusable local + CI/CD DevSecOps gate (gitleaks secret scan, SBOM+CVE+VEX via syft/grype, Claude AI code audit, `ifx`+AddressSanitizer); Numerical (correctness) testing will be added into the same workflow. | Cyber testing verified on Derecho (NCAR); numerical testing planned. |
+| **CC-Test** *(Correctness and Cyber Test)* | [`CESM-CC-Test`](https://github.com/a85tract/CESM-CC-Test) | A **CI/CD validation workflow** covering both **Cyber** (security) and **Correctness** testing of modernized software. Its Cyber half is built today — a reusable local + CI/CD DevSecOps gate (gitleaks secret scan, SBOM+CVE+VEX via syft/grype, Claude AI code audit, `ifx`+AddressSanitizer); Correctness testing will be added into the same workflow. | Cyber testing verified on Derecho (NCAR); correctness testing planned. |
 | **Sec-Track** | [`CESM-Sec-Track`](https://github.com/a85tract/CESM-Sec-Track) | Repository of N-day and responsibly disclosed 0-day vulnerabilities spanning the software, its supply-chain dependencies, and the runtime environment. **Access restricted to the PI's group.** | Active. |
 
 ---
@@ -97,7 +97,7 @@ The trust foundation. Human contributors extend these; the agent consumes them a
 
 **Pika** is a multi-LLM-agent modernization engine that combines the generative power of LLMs
 with the rigor of formal methods (neuro-symbolic). It translates languages, refactors
-architectures, ports code to accelerators, retrieves NC-Test for correctness validation, and
+architectures, ports code to accelerators, retrieves CC-Test for correctness validation, and
 stores security analyses to Sec-Track.
 
 | Repository | Role | Description |
@@ -131,5 +131,5 @@ trackers, with two exceptions:
 ## Status of This Hub
 
 SciRecast is transitioning from a research prototype to a sustainable ecosystem. Naming in
-this hub follows the ecosystem architecture (Pika / NC-Test / Sec-Track / JaxCAM6); the
+this hub follows the ecosystem architecture (Pika / CC-Test / Sec-Track / JaxCAM6); the
 backing repositories currently retain their `CESM-*` working names, noted in each table.
