@@ -1,0 +1,3 @@
+[submodule "CESM-modernization-overview"]
+	path = CESM-modernization-overview
+	url = https://github.com/a85tract/CESM-modernization-overview.git
