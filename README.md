@@ -88,7 +88,7 @@ The trust foundation. Human contributors extend these; the agent consumes them a
 
 | Component | Repository | Description | Status |
 |---|---|---|---|
-| **NC-Test** *(Numerical & Cyber Test)* | [`hpc-devsecops`](https://github.com/a85tract/hpc-devsecops) | A **CI/CD validation workflow** covering both **Cyber** (security) and **Numerical** (correctness) testing of modernized software. Its Cyber half is built today — a reusable local + CI/CD DevSecOps gate (gitleaks secret scan, SBOM+CVE+VEX via syft/grype, Claude AI code audit, `ifx`+AddressSanitizer); Numerical (correctness) testing will be added into the same workflow. | Cyber testing verified on Derecho (NCAR); numerical testing planned. |
+| **NC-Test** *(Numerical & Cyber Test)* | [`CESM-NC-Test`](https://github.com/a85tract/CESM-NC-Test) | A **CI/CD validation workflow** covering both **Cyber** (security) and **Numerical** (correctness) testing of modernized software. Its Cyber half is built today — a reusable local + CI/CD DevSecOps gate (gitleaks secret scan, SBOM+CVE+VEX via syft/grype, Claude AI code audit, `ifx`+AddressSanitizer); Numerical (correctness) testing will be added into the same workflow. | Cyber testing verified on Derecho (NCAR); numerical testing planned. |
 | **Sec-Track** | [`CESM-Sec-Track`](https://github.com/a85tract/CESM-Sec-Track) | Repository of N-day and responsibly disclosed 0-day vulnerabilities spanning the software, its supply-chain dependencies, and the runtime environment. **Access restricted to the PI's group.** | Active. |
 
 ---
