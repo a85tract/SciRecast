@@ -1,0 +1,15 @@
+SciRecast
+Copyright 2026 Yueqi Chen, University of Colorado Boulder
+
+This product includes software developed as part of the SciRecast ecosystem,
+an open-source, agentic framework for modernizing legacy scientific software.
+
+SciRecast and its artifacts are licensed under the Apache License, Version 2.0.
+Two exceptions apply, per the ecosystem's governance model:
+
+  1. Legacy code retained inside modernized software (Product Layer) remains
+     under its original open-source license. Each such component repository
+     documents that code and its license in its own NOTICE file.
+
+  2. Sec-Track (the vulnerability repository) has access restricted to the
+     PI's group to reduce the risk of malicious exploitation.
