@@ -89,7 +89,7 @@ The trust foundation. Human contributors extend these; the agent consumes them a
 | Component | Repository | Description | Status |
 |---|---|---|---|
 | **NC-Test** | [`hpc-devsecops`](https://github.com/a85tract/hpc-devsecops) | Benchmarks and validation workflows for correctness and reliability, delivered as a reusable local + CI/CD DevSecOps gate for HPC: secret scan (gitleaks), SBOM + CVE + VEX (syft/grype), Claude AI code audit, and `ifx`+AddressSanitizer. | Verified on Derecho (NCAR). |
-| **Sec-Track** | [`NCAR-HPC-Vulnerabilities`](https://github.com/a85tract/NCAR-HPC-Vulnerabilities) | Repository of N-day and responsibly disclosed 0-day vulnerabilities spanning the software, its supply-chain dependencies, and the runtime environment. **Access restricted to the PI's group.** | Active. |
+| **Sec-Track** | [`CESM-Sec-Track`](https://github.com/a85tract/CESM-Sec-Track) | Repository of N-day and responsibly disclosed 0-day vulnerabilities spanning the software, its supply-chain dependencies, and the runtime environment. **Access restricted to the PI's group.** | Active. |
 
 ---
 
