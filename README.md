@@ -123,9 +123,9 @@ We welcome bug reports, feature ideas, and vulnerability disclosures — see
 - **Found a bug or a wrong result?** Open an issue on the relevant component repository (or on
   this hub) with a reproducer.
 - **Security vulnerability?** Please **do not** open a public issue — use a private GitHub
-  security advisory or email the PI (responsible disclosure).
-- **Questions or collaboration?** Contact the Lead PI, **Yueqi Chen** (University of Colorado
-  Boulder) — <yuch8134@colorado.edu>.
+  security advisory or email Yueqi Chen (responsible disclosure).
+- **Questions or collaboration?** Contact **Yueqi Chen** (University of Colorado
+  Boulder) — <yueqi.chen@colorado.edu>.
 
 ---
 
@@ -137,7 +137,7 @@ trackers, with two exceptions:
 
 - **Legacy code** retained inside modernized software remains under its original open-source
   license, as documented in the `NOTICE` file of the respective component repository.
-- **Sec-Track** access is restricted to the PI's group to reduce the risk of malicious
+- **Sec-Track** access is restricted to reduce the risk of malicious
   exploitation.
 
 ---

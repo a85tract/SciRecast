@@ -39,5 +39,5 @@ documented in each component's `NOTICE` file.
 
 ## Contact
 
-- **Lead PI:** Yueqi Chen, University of Colorado Boulder — <yuch8134@colorado.edu>
+- **Lead PI:** Yueqi Chen, University of Colorado Boulder — <yueqi.chen@colorado.edu>
 - **Issue trackers:** on each component repository (see the [README](README.md) for the map)
