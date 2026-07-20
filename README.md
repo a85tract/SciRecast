@@ -43,21 +43,21 @@ flowchart TB
         NCTest["CC-Test"]
         SecTrack["Sec-Track"]
     end
-    subgraph Core["🟥 Core Layer — Pika: multi-LLM-agent modernization engine"]
-        Pika["Pika (neuro-symbolic)"]
+    subgraph Core["🟥 Core Layer — RecastEngine: multi-LLM-agent modernization engine"]
+        RecastEngine["RecastEngine (neuro-symbolic)"]
     end
 
-    Pika -- "translate · refactor · port to accelerators" --> Product
-    Pika -- "retrieve for correctness validation" --> NCTest
-    Pika -- "store security analyses" --> SecTrack
+    RecastEngine -- "translate · refactor · port to accelerators" --> Product
+    RecastEngine -- "retrieve for correctness validation" --> NCTest
+    RecastEngine -- "store security analyses" --> SecTrack
     NCTest -- "gate" --> Product
     SecTrack -- "gate" --> Product
 ```
 
 **Contribution model.** Unlike traditional open-source ecosystems, human developers do **not**
 directly modify the modernized software in the Product Layer. When end users open issues, the
-agentic engine (Pika) generates, tests, and merges the fixes. Humans instead contribute to the
-**Core Layer** (extending Pika with new formal methods and agentic designs) and to the
+agentic engine (RecastEngine) generates, tests, and merges the fixes. Humans instead contribute to the
+**Core Layer** (extending RecastEngine with new formal methods and agentic designs) and to the
 **Support Layer** (adding benchmark suites, completing validation workflows, and responsibly
 reporting vulnerabilities).
 
@@ -93,16 +93,17 @@ The trust foundation. Human contributors extend these; the agent consumes them a
 
 ---
 
-## 🟥 Core Layer — Pika, the Modernization Engine
+## 🟥 Core Layer — RecastEngine, the Modernization Engine
 
-**Pika** is a multi-LLM-agent modernization engine that combines the generative power of LLMs
+**RecastEngine** is a multi-LLM-agent modernization engine that combines the generative power of LLMs
 with the rigor of formal methods (neuro-symbolic). It translates languages, refactors
 architectures, ports code to accelerators, retrieves CC-Test for correctness validation, and
-stores security analyses to Sec-Track.
+stores security analyses to Sec-Track. It is tracked directly in this hub as the
+[`RecastEngine`](RecastEngine) submodule.
 
 | Repository | Role | Description |
 |---|---|---|
-| [`CESM-language-translator`](https://github.com/a85tract/CESM-language-translator) | Tool | Deterministic Fortran → Python translation pipeline (SymPy-based); ZM + MG2 translations verified bit-exact. |
+| [`RecastEngine`](RecastEngine) *(submodule → [`CESM-language-translator`](https://github.com/a85tract/CESM-language-translator))* | Engine | Deterministic Fortran → Python translation pipeline (SymPy-based); ZM + MG2 translations verified bit-exact. |
 | [`CESM-Agent-Produced-Scripts`](https://github.com/a85tract/CESM-Agent-Produced-Scripts) | Tool | Agent-produced scripts supporting the modernization workflow. |
 
 ---
@@ -145,5 +146,6 @@ trackers, with two exceptions:
 ## Status of This Hub
 
 SciRecast is transitioning from a research prototype to a sustainable ecosystem. Naming in
-this hub follows the ecosystem architecture (Pika / CC-Test / Sec-Track / JaxCAM6); the
-backing repositories currently retain their `CESM-*` working names, noted in each table.
+this hub follows the ecosystem architecture (RecastEngine / CC-Test / Sec-Track / JaxCAM6); the
+backing repositories currently retain their `CESM-*` working names, noted in each table. The
+RecastEngine engine is vendored here as a submodule (backed by `CESM-language-translator`).
