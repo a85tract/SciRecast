@@ -6,13 +6,12 @@ LLM agents do the labor-intensive porting work under human oversight; every arti
 only after passing correctness validation and security review. This repository is the entry
 point, and it contains exactly two things:
 
-| | What it is |
+| Submodule | What it is |
 |---|---|
-| [`RecastEngine`](RecastEngine) | The modernization engine — the reusable, domain-independent part of SciRecast. |
-| [`CESM-modernization-overview`](CESM-modernization-overview) | Our first case: modernizing CESM/CAM, the community Earth-system model. |
+| [`RecastEngine`](https://github.com/a85tract/CESM-language-translator) | The modernization engine — the reusable, domain-independent part of SciRecast. |
+| [`CESM-modernization-overview`](https://github.com/a85tract/CESM-modernization-overview) | Our first case: modernizing CESM/CAM, the community Earth-system model. **Every Support- and Product-Layer component lives in there**, as its own submodule. |
 
-Everything else lives inside the case. Run
-`git submodule update --init --recursive` to populate both.
+Run `git submodule update --init --recursive` to populate both.
 
 ---
 
@@ -43,7 +42,7 @@ flowchart TB
     SecTrack -- "gate" --> Product
 ```
 
-**🟥 Core Layer — [`RecastEngine`](RecastEngine).** A multi-LLM-agent engine that combines the
+**🟥 Core Layer — [`RecastEngine`](https://github.com/a85tract/CESM-language-translator).** A multi-LLM-agent engine that combines the
 generative power of LLMs with the rigor of formal methods (neuro-symbolic). It translates
 languages, refactors architectures, ports code to accelerators, retrieves CC-Test for
 correctness validation, and stores security analyses to Sec-Track. In the CESM case it drives
@@ -58,8 +57,11 @@ vulnerabilities across the software, its supply chain, and its runtime.
 
 **🟦 Product Layer — the modernized software itself.** For CESM this runs as two pipelines:
 CAM5 rewritten to modular Python (`PyCAM5`, `freeCAM`, `PyCCPP`), and CAM6 physics kernels
-ported to GPUs (`JaxCAM6`, `NumbaCAM6`). Per-scheme progress and validated-run evidence live in
-the [case tracker](CESM-modernization-overview).
+ported to GPUs (`JaxCAM6`, `NumbaCAM6`).
+
+Both of these layers are assembled in the case repository — see
+**[`CESM-modernization-overview`](https://github.com/a85tract/CESM-modernization-overview)** for
+the component repositories, per-scheme progress, and validated-run evidence.
 
 **Contribution model.** Human developers do **not** directly modify the Product Layer. When end
 users open issues, RecastEngine generates, tests, and merges the fixes. Humans contribute to the
