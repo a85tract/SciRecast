@@ -2,150 +2,81 @@
 
 **An open-source, agentic ecosystem for modernizing legacy scientific software.**
 
-SciRecast makes the modernization of legacy scientific codes *reusable, reproducible,
-validable, secure, and scalable* across scientific domains, programming languages, and
-computing platforms. LLM agents do the labor-intensive porting work under human oversight;
-every artifact ships only after passing correctness validation and security review.
+LLM agents do the labor-intensive porting work under human oversight; every artifact ships
+only after passing correctness validation and security review. This repository is the entry
+point, and it contains exactly two things:
 
-> This repository is the unified entry point to the SciRecast ecosystem. Each component
-> below lives in its own repository — this page maps the ecosystem architecture to those
-> repositories and tracks their status.
+| | What it is |
+|---|---|
+| [`RecastEngine`](RecastEngine) | The modernization engine — the reusable, domain-independent part of SciRecast. |
+| [`CESM-modernization-overview`](CESM-modernization-overview) | Our first case: modernizing CESM/CAM, the community Earth-system model. |
 
----
-
-## Guiding Principles
-
-1. **Domain-Need-First** — Modernization goals, success criteria, and priorities are set by
-   the needs and practices of the scientific domains SciRecast serves.
-2. **Agentic-Design-Focused** — SciRecast maximizes the utility of LLM agents while remaining
-   inspectable and subject to human oversight.
-3. **Validation & Accountability** — Every modernized artifact is backed by reproducible
-   validation evidence and transparent provenance.
-4. **Security & Sustainability** — Signed releases, CI/CD-backed regression testing,
-   responsible vulnerability disclosure, and open governance.
+Everything else lives inside the case. Run
+`git submodule update --init --recursive` to populate both.
 
 ---
 
-## Ecosystem Architecture
+## The Three Layers, Seen Through the CESM Case
 
-SciRecast is organized into three layers. **Humans maintain the inner two layers**
-(the agent engine, and the validation & security infrastructure). **The agent produces the
-outermost layer** — and only after the artifact passes validation and security checks.
+SciRecast is organized into three layers. **Humans maintain the inner two** (the engine, and
+the validation & security infrastructure); **the agent produces the outermost one** — and only
+after the artifact passes the gates.
 
 ```mermaid
 flowchart TB
-    subgraph Product["🟦 Product Layer — modernized scientific software (Earth Science today)"]
-        PyCAM5["PyCAM5"]
-        PyCCPP["PyCCPP"]
-        JaxCAM6["JaxCAM6"]
+    subgraph Product["🟦 Product Layer — modernized software (CESM case)"]
+        PyCAM5["PyCAM5 · freeCAM · PyCCPP"]
+        JaxCAM6["JaxCAM6 · NumbaCAM6"]
     end
-    subgraph Support["🟩 Support Layer — Validation &amp; Security Infrastructure"]
-        NCTest["CC-Test"]
+    subgraph Support["🟩 Support Layer — Validation &amp; Security"]
+        CCTest["CC-Test"]
         SecTrack["Sec-Track"]
     end
-    subgraph Core["🟥 Core Layer — RecastEngine: multi-LLM-agent modernization engine"]
-        RecastEngine["RecastEngine (neuro-symbolic)"]
+    subgraph Core["🟥 Core Layer — RecastEngine"]
+        Engine["multi-LLM-agent, neuro-symbolic"]
     end
 
-    RecastEngine -- "translate · refactor · port to accelerators" --> Product
-    RecastEngine -- "retrieve for correctness validation" --> NCTest
-    RecastEngine -- "store security analyses" --> SecTrack
-    NCTest -- "gate" --> Product
+    Engine -- "translate · refactor · port to accelerators" --> Product
+    Engine -- "retrieve for correctness validation" --> CCTest
+    Engine -- "store security analyses" --> SecTrack
+    CCTest -- "gate" --> Product
     SecTrack -- "gate" --> Product
 ```
 
-**Contribution model.** Unlike traditional open-source ecosystems, human developers do **not**
-directly modify the modernized software in the Product Layer. When end users open issues, the
-agentic engine (RecastEngine) generates, tests, and merges the fixes. Humans instead contribute to the
-**Core Layer** (extending RecastEngine with new formal methods and agentic designs) and to the
-**Support Layer** (adding benchmark suites, completing validation workflows, and responsibly
-reporting vulnerabilities).
+**🟥 Core Layer — [`RecastEngine`](RecastEngine).** A multi-LLM-agent engine that combines the
+generative power of LLMs with the rigor of formal methods (neuro-symbolic). It translates
+languages, refactors architectures, ports code to accelerators, retrieves CC-Test for
+correctness validation, and stores security analyses to Sec-Track. In the CESM case it drives
+the deterministic Fortran → Python translation pipeline (SymPy-based); the ZM and MG2 schemes
+are verified bit-exact.
+
+**🟩 Support Layer — the trust foundation.** *CC-Test* is a CI/CD workflow covering both
+**C**orrectness and **C**yber testing; its Cyber half is a working DevSecOps gate (secret
+scanning, SBOM + CVE + VEX, AI code audit, sanitizer builds), verified on NCAR's Derecho.
+*Sec-Track* is a restricted-access record of N-day and responsibly disclosed 0-day
+vulnerabilities across the software, its supply chain, and its runtime.
+
+**🟦 Product Layer — the modernized software itself.** For CESM this runs as two pipelines:
+CAM5 rewritten to modular Python (`PyCAM5`, `freeCAM`, `PyCCPP`), and CAM6 physics kernels
+ported to GPUs (`JaxCAM6`, `NumbaCAM6`). Per-scheme progress and validated-run evidence live in
+the [case tracker](CESM-modernization-overview).
+
+**Contribution model.** Human developers do **not** directly modify the Product Layer. When end
+users open issues, RecastEngine generates, tests, and merges the fixes. Humans contribute to the
+Core Layer (new formal methods and agentic designs) and to the Support Layer (benchmark suites,
+validation workflows, vulnerability reports).
 
 ---
 
-## 🟦 Product Layer — Modernized Scientific Software
+## Contributing & Contact
 
-End-user-facing modernized software. Current focus: **Earth Science**.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md). Bug reports and feature ideas go to the relevant
+component repository. **Security vulnerabilities:** please do *not* open a public issue — use a
+private GitHub security advisory or email **Yueqi Chen** (University of Colorado Boulder),
+<yueqi.chen@colorado.edu>.
 
-| Product | Repository | Description | Status |
-|---|---|---|---|
-| **PyCAM5** | [`PyCAM5`](https://github.com/a85tract/PyCAM5) | Python version of the Community Atmosphere Model 5, modularized for flexible reuse. | 675 runtime selectors; PI & MCO 6-month runs **bit-for-bit equal** to the native Fortran baseline. |
-| **PyCCPP** | [`PyCCPP`](https://github.com/a85tract/PyCCPP) | Python version of the Common Community Physics Package (CCPP), easing integration of physics packages across NOAA, DOE, NASA, and the U.S. Air Force. | Early stage. |
-| **JaxCAM6** | [`CESM-jax-kernels`](https://github.com/a85tract/CESM-jax-kernels) | JAX version of CAM6 with computational kernels accelerated on NVIDIA GPUs (8 physics schemes). | ZM / MG / Kessler / Held-Suarez / TJ2016 validated; CLUBB in progress; Radiation partial. |
+## License
 
-**Related delivery components** (supporting the CAM6 port; not yet a self-contained product):
-
-| Repository | Description |
-|---|---|
-| [`CESM-numba-kernels`](https://github.com/a85tract/CESM-numba-kernels) | Numba `@njit` (CPU) + `@cuda.jit` (GPU) kernels for CAM6 physics — the second acceleration path. |
-| [`CESM-pyphys-bridge`](https://github.com/a85tract/CESM-pyphys-bridge) | Fortran ↔ Python runtime bridge: embedded CPython lets Fortran CAM physics call JAX/Numba kernels, selectable by environment variable. |
-
----
-
-## 🟩 Support Layer — Validation & Security Infrastructure
-
-The trust foundation. Human contributors extend these; the agent consumes them as gates.
-
-| Component | Repository | Description | Status |
-|---|---|---|---|
-| **CC-Test** *(Correctness and Cyber Test)* | [`CESM-CC-Test`](https://github.com/a85tract/CESM-CC-Test) | A **CI/CD validation workflow** covering both **Cyber** (security) and **Correctness** testing of modernized software. Its Cyber half is built today — a reusable local + CI/CD DevSecOps gate (gitleaks secret scan, SBOM+CVE+VEX via syft/grype, Claude AI code audit, `ifx`+AddressSanitizer); Correctness testing will be added into the same workflow. | Cyber testing verified on Derecho (NCAR); correctness testing planned. |
-| **Sec-Track** | [`CESM-Sec-Track`](https://github.com/a85tract/CESM-Sec-Track) | Repository of N-day and responsibly disclosed 0-day vulnerabilities spanning the software, its supply-chain dependencies, and the runtime environment. **Access restricted.** | Active. |
-
----
-
-## 🟥 Core Layer — RecastEngine, the Modernization Engine
-
-**RecastEngine** is a multi-LLM-agent modernization engine that combines the generative power of LLMs
-with the rigor of formal methods (neuro-symbolic). It translates languages, refactors
-architectures, ports code to accelerators, retrieves CC-Test for correctness validation, and
-stores security analyses to Sec-Track. It is tracked directly in this hub as the
-[`RecastEngine`](RecastEngine) submodule.
-
-| Repository | Role | Description |
-|---|---|---|
-| [`RecastEngine`](RecastEngine) *(submodule → [`CESM-language-translator`](https://github.com/a85tract/CESM-language-translator))* | Engine | Deterministic Fortran → Python translation pipeline (SymPy-based); ZM + MG2 translations verified bit-exact. |
-| [`CESM-Agent-Produced-Scripts`](https://github.com/a85tract/CESM-Agent-Produced-Scripts) | Tool | Agent-produced scripts supporting the modernization workflow. |
-
----
-
-## Domain View
-
-| Domain | Entry point | Description |
-|---|---|---|
-| Earth Science (CESM/CAM) | [`CESM-modernization-overview`](https://github.com/a85tract/CESM-modernization-overview) | Master tracker / dashboard for the CAM physics Fortran-to-Python (JAX/Numba GPU) porting effort — per-scheme progress, validated-run archive, and deployment reference. |
-
----
-
-## Contributing & Feedback
-
-We welcome bug reports, feature ideas, and vulnerability disclosures — see
-[`CONTRIBUTING.md`](CONTRIBUTING.md) for details. In short:
-
-- **Found a bug or a wrong result?** Open an issue on the relevant component repository (or on
-  this hub) with a reproducer.
-- **Security vulnerability?** Please **do not** open a public issue — use a private GitHub
-  security advisory or email Yueqi Chen (responsible disclosure).
-- **Questions or collaboration?** Contact **Yueqi Chen** (University of Colorado
-  Boulder) — <yueqi.chen@colorado.edu>.
-
----
-
-## Licensing & Governance
-
-SciRecast is licensed under the **Apache License 2.0** — see [`LICENSE`](LICENSE) and
-[`NOTICE`](NOTICE). All artifacts are released under the same license with public issue
-trackers, with two exceptions:
-
-- **Legacy code** retained inside modernized software remains under its original open-source
-  license, as documented in the `NOTICE` file of the respective component repository.
-- **Sec-Track** access is restricted to reduce the risk of malicious
-  exploitation.
-
----
-
-## Status of This Hub
-
-SciRecast is transitioning from a research prototype to a sustainable ecosystem. Naming in
-this hub follows the ecosystem architecture (RecastEngine / CC-Test / Sec-Track / JaxCAM6); the
-backing repositories currently retain their `CESM-*` working names, noted in each table. The
-RecastEngine engine is vendored here as a submodule (backed by `CESM-language-translator`).
+Apache License 2.0 — see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE). Two exceptions: legacy
+code retained inside modernized software keeps its original license (documented in each
+component's `NOTICE`), and Sec-Track access is restricted to reduce exploitation risk.
