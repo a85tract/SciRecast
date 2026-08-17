@@ -8,7 +8,7 @@ point, and it contains exactly two things:
 
 | Submodule | What it is |
 |---|---|
-| [`RecastEngine`](https://github.com/a85tract/CESM-language-translator) | The modernization engine — the reusable, domain-independent part of SciRecast. |
+| [`RecastEngine`](https://github.com/a85tract/RecastEngine) | The modernization engine — the reusable, domain-independent part of SciRecast. |
 | [`CESM-modernization-overview`](https://github.com/a85tract/CESM-modernization-overview) | Our first case: modernizing CESM/CAM, the community Earth-system model. **Every Support- and Product-Layer component lives in there**, as its own submodule. |
 
 Run `git submodule update --init --recursive` to populate both.
@@ -42,7 +42,7 @@ flowchart TB
     SecTrack -- "gate" --> Product
 ```
 
-**🟥 Core Layer — [`RecastEngine`](https://github.com/a85tract/CESM-language-translator).** A multi-LLM-agent engine that combines the
+**🟥 Core Layer — [`RecastEngine`](https://github.com/a85tract/RecastEngine).** A multi-LLM-agent engine that combines the
 generative power of LLMs with the rigor of formal methods (neuro-symbolic). It translates
 languages, refactors architectures, ports code to accelerators, retrieves CC-Test for
 correctness validation, and stores security analyses to Sec-Track. In the CESM case it drives
