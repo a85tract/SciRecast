@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+#
+# Installed into each submodule's hooks directory by tools/install-hooks.sh.
+#
+# Committing inside a submodule leaves the superproject pointing at the old
+# commit. Nothing warns you: `git status` in SciRecast shows a terse ` M`, and
+# the dashboard silently keeps advertising the previous state until someone
+# bumps the gitlink. This prints the two commands that finish the job.
+
+set -u
+
+# Superproject path, if we are in fact inside one.
+SUPER="$(git rev-parse --show-superproject-working-tree 2>/dev/null || true)"
+[ -n "$SUPER" ] || exit 0
+
+SUB="$(git rev-parse --show-toplevel)"
+NAME="$(basename "$SUB")"
+SHA="$(git rev-parse --short HEAD)"
+FULL="$(git rev-parse HEAD)"
+
+# git exports GIT_DIR and GIT_INDEX_FILE into hooks, so a plain `git -C $SUPER`
+# still reads *this* submodule's repository. Strip them before asking the
+# superproject anything.
+supergit() { env -u GIT_DIR -u GIT_INDEX_FILE -u GIT_WORK_TREE -u GIT_PREFIX \
+             git -C "$SUPER" "$@"; }
+
+# Only speak up if the gitlink is actually behind.
+RECORDED="$(supergit ls-tree HEAD "$NAME" 2>/dev/null | awk '{print $3}')"
+[ "$RECORDED" = "$FULL" ] && exit 0
+
+printf '\n\033[33m%s\033[0m\n' "$NAME is now at $SHA, but $(basename "$SUPER") still points at ${RECORDED:0:7}."
+printf '  Push here first, then bump the superproject:\n\n'
+printf '    git -C %s add %s \\\n' "$SUPER" "$NAME"
+printf '      && git -C %s commit -m "Advance %s to %s"\n\n' "$SUPER" "$NAME" "$SHA"
+exit 0
