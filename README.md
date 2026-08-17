@@ -11,7 +11,9 @@ point, and it contains exactly two things:
 | [`RecastEngine`](https://github.com/a85tract/RecastEngine) | The modernization engine — the reusable, domain-independent part of SciRecast. |
 | [`CESM-modernization-overview`](https://github.com/a85tract/CESM-modernization-overview) | Our first case: modernizing CESM/CAM, the community Earth-system model. **Every Support- and Product-Layer component lives in there**, as its own submodule. |
 
-Run `git submodule update --init --recursive` to populate both.
+Run `git submodule update --init` to populate both. Going deeper with
+`--recursive` will stop on the component repositories that are not public yet —
+follow the links in the case repository instead.
 
 ---
 
