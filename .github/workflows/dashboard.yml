@@ -11,10 +11,10 @@ name: dashboard
 # linked rather than submoduled. A component the runner cannot read is reported
 # by the generator as not counted, which is the honest result; the alternative
 # is a workflow that only ever runs for people holding every key.
+
+# Automatic runs are off while the Actions allowance is exhausted. Restore the
+# pull_request trigger and the Monday 06:17 UTC schedule when the quota resets.
 on:
-  pull_request:
-  schedule:
-    - cron: "17 6 * * 1"   # Mondays, off the hour to miss the rush
   workflow_dispatch:
 
 permissions:

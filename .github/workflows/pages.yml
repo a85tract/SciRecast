@@ -4,14 +4,11 @@ name: pages
 # own front matter. The README is the short way in and restates none of it; the
 # counted blocks are written by tools/refresh_dashboard.py from the submodules,
 # so the site and the repository cannot drift into two sets of numbers.
+
+# Automatic runs are off while the Actions allowance is exhausted. Restore the
+# push trigger on main, filtered to "*.md", _layouts/**, _config.yml, and this
+# workflow, when the quota resets.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "*.md"
-      - _layouts/**
-      - _config.yml
-      - .github/workflows/pages.yml
   workflow_dispatch:
 
 permissions:
