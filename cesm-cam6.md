@@ -27,7 +27,7 @@ scheme-by-scheme against native CESM/CAM output.
 
 **Cumulative bugs found and fixed**: 53+ (ZM 25, MG 15+, CLUBB 13)
 
-### Kernels (submodules)
+### Kernels
 
 **[JaxCAM6/](https://github.com/a85tract/CESM-jax-kernels)** → `CESM-jax-kernels`
 All JAX kernel implementations, organized by physics scheme.
@@ -39,7 +39,7 @@ All Numba (`@njit` + `@cuda.jit`) kernel implementations.
 - Schemes: ZM, MG, CLUBB (+Option C), Kessler; plus the Option C C/PTX launcher
 - Sizes and test-file counts: see the generated inventory above.
 
-### Bridge & Agent Tooling (related repos — not linked here as submodules)
+### Bridge & Agent Tooling (related repos, not counted here)
 
 **[CESM-pyphys-bridge](https://github.com/a85tract/CESM-pyphys-bridge)**
 Fortran-Python bridge runtime, per-scheme adapters, CESM SourceMods, and deployment scripts.

@@ -1,13 +1,20 @@
-# Working clones that live here for convenience but are not submodules.
-# SciRecast tracks RecastEngine plus the CESM case's components under cesm/.
-# Everything below is checked out beside them so the migration work has its
-# sources at hand, and must never be committed.
+# Working clones that live here for convenience. This repository is the
+# dashboard and tracks none of them: the components are cloned on demand by
+# tools/refresh_dashboard.py, counted, and discarded, so anything checked out
+# beside it is one developer's convenience and must never be committed.
 /recast-cesm/
 /CESM-language-translator/
 /CESM-Agent-Produced-Scripts/
+/RecastEngine/
+/cesm/CC-Test/
+/cesm/JaxCAM6/
+/cesm/NumbaCAM6/
+/cesm/PyCAM5/
+/cesm/PyCCPP/
+/cesm/freeCAM/
 
 # macOS
 .DS_Store
-# PyCAM5 is pinned at cesm/PyCAM5; a copy at the top level is a scratch clone,
-# and committing it would ship an embedded repository nobody can fetch.
+# A top-level PyCAM5 is a scratch clone; committing it would ship an embedded
+# repository nobody can fetch.
 /PyCAM5/

@@ -25,9 +25,9 @@ The CESM case's vulnerability record: N-day and responsibly disclosed 0-day find
 the modernized software, its supply-chain dependencies, and the runtime environment. Access
 is restricted to reduce the risk of malicious exploitation.
 
-**Linked, not submoduled.** Access is granted per person, so wiring it in as a submodule
-would make `git submodule update --init --recursive` fail for everyone who does not have
-it — and git abandons the whole recursive clone at the first failure, so one restricted
-repository would take the public ones down with it. Request access if you need it.
+**Listed, never counted.** Access is granted per person, so no public run of
+`tools/refresh_dashboard.py` can clone it, and a figure nobody outside can re-derive would be
+a claim rather than evidence. It appears on these pages by name and by what it is for, and
+nowhere as a number. Request access if you need it.
 
 ---

@@ -17,28 +17,29 @@ shared validation layer.
 
 Two halves across these pages, and the difference matters when you read a
 number. The **inventory** and **gate conclusions** below are generated from the
-submodules themselves by
+component repositories themselves by
 [`tools/refresh_dashboard.py`](https://github.com/a85tract/SciRecast/blob/main/tools/refresh_dashboard.py),
 each figure beside the revision it was counted at. Everything on the three pages
 linked above is **human assessment** and carries its own date.
 
 ## Component Inventory
 
-Counts and revisions below are taken from the checked-out submodules by
-[`tools/refresh_dashboard.py`](tools/refresh_dashboard.py), not typed in. Each number sits
-beside the revision it was counted at, so it can be re-derived rather than trusted.
+Counts and revisions below are taken from the component repositories by
+[`tools/refresh_dashboard.py`](tools/refresh_dashboard.py), not typed in — it clones each one
+at its default branch, counts it, and discards the clone. Each number sits beside the revision
+it was counted at, so it can be re-derived rather than trusted.
 
 <!-- generated:inventory -->
-| Component | Pinned revision | Last commit | Counted |
+| Component | Revision counted | Last commit | Counted |
 |---|---|---|---|
 | `PyCAM5` | `e8d6899` | 2026-08-10 | 831 runtime selectors, 55 Codon modules, 2,475 exported routines |
-| `freeCAM` | `117f9ea` | 2026-08-15 | 96 Python files |
+| `freeCAM` | `5b18907` | 2026-08-18 | 101 Python files |
 | `PyCCPP` | `d57889a` | 2026-04-23 | 1,079 Fortran files |
 | `JaxCAM6` | `1b7c82b` | 2026-07-06 | 8 schemes, 12,444 kernel lines, 22 test files |
 | `NumbaCAM6` | `c86638f` | 2026-07-06 | 4 schemes, 19,993 kernel lines, 62 test files |
 | `CC-Test` | `49af867` | 2026-08-13 | 3 tools |
 
-*Counted by `tools/refresh_dashboard.py` at 2026-08-19 06:14 UTC, from the submodule revisions above. Re-run it after `git submodule update --remote`; every number here is reproducible from the pinned revision beside it.*
+*Counted by `tools/refresh_dashboard.py` at 2026-08-19 15:21 UTC, from a fresh clone of each component's default branch. Re-run it to bring the numbers to the current tips; every number here is reproducible from the revision beside it.*
 <!-- /generated:inventory -->
 
 ### Gate conclusions
@@ -72,33 +73,34 @@ component repository is authoritative for its own state.
 | Status metric | Runtime selector coverage + long-run BFB evidence | Per-scheme progress dashboard (8 schemes) |
 
 Shared across both pipelines: **Validation & Security** infrastructure (`CESM-CC-Test`,
-`CESM-Sec-Track`). Linked sub-projects are git submodules — run
-`git submodule update --init --recursive` to populate them.
+`CESM-Sec-Track`). Each component is its own repository; clone whichever ones you need.
 
-`CESM-Sec-Track` is **not** among them. It is linked but never vendored, because it
-holds unpatched vulnerabilities and a submodule of a public repository has to be
-publicly cloneable to be useful. See [Sec-Track](#sec-track--cesm-sec-track-restricted).
+`CESM-Sec-Track` is the one nothing here counts. It holds unpatched vulnerabilities, so
+access is granted per person and no public run can re-derive a number from it. See
+[Sec-Track](#sec-track--cesm-sec-track-restricted).
 
 ---
 
-## Repository Layout
+## Where each piece lives
+
+Every name below is a repository of its own. This page counts the first three groups and
+clones them on demand; the rest are listed so the map is complete, not because anything here
+reads them.
 
 ```
-cesm-modernization-overview/   <- You are here (master tracker)
+  # ── Pipeline 1: CAM5 → Python + decoupling ──
+  PyCAM5            -> PyCAM5                     Python/Codon CAM5 port (BFB validated)
+  freeCAM           -> freeCAM                    Python-owned CAM control path + decomposable devices
+  PyCCPP            -> PyCCPP                     Python Common Community Physics Package
 
-  # ── Pipeline 1: CAM5 → Python + decoupling (submodules) ──
-  PyCAM5/           -> PyCAM5                     Python/Codon CAM5 port (BFB validated)
-  freeCAM/          -> freeCAM                    Python-owned CAM control path + decomposable devices
-  PyCCPP/           -> PyCCPP                     Python Common Community Physics Package
+  # ── Pipeline 2: CAM6 → Python/JAX + GPU ──
+  JaxCAM6           -> CESM-jax-kernels           JAX kernel implementations
+  NumbaCAM6         -> CESM-numba-kernels         Numba CPU+GPU kernels
 
-  # ── Pipeline 2: CAM6 → Python/JAX + GPU (submodules) ──
-  JaxCAM6/          -> CESM-jax-kernels           JAX kernel implementations
-  NumbaCAM6/        -> CESM-numba-kernels         Numba CPU+GPU kernels
+  # ── Shared: validation & security ──
+  CC-Test           -> CESM-CC-Test               CC-Test: CI/CD validation workflow (Cyber now, Correctness later)
 
-  # ── Shared: validation & security (submodules) ──
-  CC-Test/          -> CESM-CC-Test              CC-Test: CI/CD validation workflow (Cyber now, Correctness later)
-
-  # ── Related repos (NOT linked here as submodules) ──
+  # ── Related, and not counted here ──
                        CESM-Sec-Track              Sec-Track: N-day/0-day vuln repo (restricted access)
                        CESM-pyphys-bridge          Fortran-Python bridge + CESM adapters
                        CESM-Agent-Produced-Scripts Agent-produced modernization scripts

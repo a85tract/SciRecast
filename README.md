@@ -16,24 +16,28 @@ only after passing correctness validation and security review.
 
 This README is the thirty-second version and links onward rather than restating. Each section
 lives in exactly one page source (`index.md`, `engine.md`, `cesm.md`, …); the counted parts of
-the engine and CESM pages are generated from the submodules by
+the engine and CESM pages are generated from the component repositories by
 [`tools/refresh_dashboard.py`](tools/refresh_dashboard.py), so a figure there is never older
 than the revision printed beside it.
 
 <!-- generated:headline -->
-**6 of 6 components checked out here; no gate conclusions committed yet.** See the page for the inventory, the per-scheme progress, and what each figure was measured against.
+**6 of 6 components counted; no gate conclusions committed yet.** See the page for the inventory, the per-scheme progress, and what each figure was measured against.
 <!-- /generated:headline -->
 
 ## What is here
 
+The pages, and the tool that fills in their counted parts. No component is checked out or
+pinned here, so there is nothing to initialise — the tool clones what it needs, counts it, and
+throws the clone away:
+
 ```bash
-git submodule update --init --recursive
+python tools/refresh_dashboard.py
 ```
 
 | | |
 |---|---|
 | [`RecastEngine`](https://github.com/a85tract/RecastEngine) | the engine — domain-independent: contracts, recipes, gates |
-| `cesm/` | the first case's components, each its own submodule |
+| the `cesm/…` names below | the first case's components, each its own repository |
 
 **CESM · Pipeline 1 (CAM5 → Python):** [`PyCAM5`](https://github.com/a85tract/PyCAM5) ·
 [`freeCAM`](https://github.com/a85tract/freeCAM) · [`PyCCPP`](https://github.com/a85tract/PyCCPP)
@@ -42,21 +46,21 @@ git submodule update --init --recursive
 [`NumbaCAM6`](https://github.com/a85tract/CESM-numba-kernels)
 
 **CESM · Shared:** [`CC-Test`](https://github.com/a85tract/CESM-CC-Test) ·
-[`Sec-Track`](https://github.com/a85tract/CESM-Sec-Track) (restricted — linked, never
-submoduled, because one unreadable submodule takes a recursive clone down with it)
+[`Sec-Track`](https://github.com/a85tract/CESM-Sec-Track) (restricted — listed but never
+counted: access is granted per person, and a number nobody outside can re-derive is not
+evidence)
 
-Components sit under `cesm/` rather than at the top level so that the case grouping survives
-in the tree: a second case is a second directory, not more names in a flat bag.
+Components are named `cesm/…` rather than by bare name so the case grouping survives: a second
+case is a second prefix, not more names in a flat bag.
 
 ## Why a repository and not only a site
 
-Because the submodule pointers are a record, not decoration. This repository at a given commit
-pins one revision of the engine and one of every component, so a result is reproducible from a
-single hash: `git submodule update --init --recursive` and you have the tree that produced it.
-The `Advance <component> to <sha>` commits in the history are that record over time, and the
-hooks in [`hooks/`](hooks/) (install with [`tools/install-hooks.sh`](tools/install-hooks.sh))
-keep the pointers from silently falling behind the work. A site cannot hold any of that; it is
-the same facts, rendered for reading.
+Because the numbers have to be re-derivable, and only a repository can hold what re-derives
+them. The generator, the pages it writes into, and the markers it writes between all sit in one
+tree, so `python tools/refresh_dashboard.py --check` says whether what is published still
+matches what the components contain. Each row carries the revision it was measured at, and the
+history records what the dashboard claimed and when. A site can show the numbers; it cannot
+show that they were earned.
 
 ## License
 

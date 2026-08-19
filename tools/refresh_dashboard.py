@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
-"""Regenerate the counted parts of README.md from the submodules themselves.
+"""Regenerate the counted parts of README.md from the component repositories.
 
 The dashboard used to be hand-copied, which is why it carried a date and why
 the date kept aging past the work. This tool replaces the parts that are
-*countable* with counts taken from the checked-out submodules, and stamps each
+*countable* with counts taken from the components themselves, and stamps each
 with the revision it counted -- a number without the revision it was measured
 at is not reproducible, and a dashboard nobody can reproduce is decoration.
+
+The components are not checked out here. This repository is the dashboard and
+nothing else, so each component is shallow-cloned at its default branch into a
+scratch directory, counted, and discarded. That buys a repository with no
+pointers to keep current; it costs the pin -- a row is now "the branch tip when
+this ran", which is exactly why every row still carries the revision it was
+measured at.
 
 What it deliberately does NOT touch: the per-scheme progress table, the bug
 counts, the run archive, the work items. Those are human judgements ("CLUBB
@@ -14,18 +21,21 @@ hand-maintained, outside the generated markers, and the report says so rather
 than implying the whole file is derived.
 
 Usage:
-    git submodule update --init            # counts need the trees present
-    python tools/refresh_dashboard.py      # rewrites the marked blocks
-    python tools/refresh_dashboard.py --check   # CI: fail if stale
+    python tools/refresh_dashboard.py           # clone, count, rewrite
+    python tools/refresh_dashboard.py --check   # do not write; fail if stale
+    python tools/refresh_dashboard.py --checkout-dir ~/.cache/scirecast
 """
 
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
+import os
 import re
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -33,19 +43,21 @@ ROOT = Path(__file__).resolve().parent.parent
 README = ROOT / "README.md"
 PAGE = ROOT / "cesm.md"
 ENGINE_PAGE = ROOT / "engine.md"
-ENGINE = ROOT / "RecastEngine"
+ENGINE_NAME = "RecastEngine"
+ENGINE_URL = "https://github.com/a85tract/RecastEngine.git"
 """Two targets, and the split is the point. ``cesm.md`` is the CESM
 case's page -- the inventory and the gate conclusions in full.
 ``README.md`` is the thirty-second version and carries one generated line, not a second copy of the
 tables: a table maintained in two places is a table that will disagree with
 itself, which is the failure this tool exists to end."""
 
-# One entry per submodule: how to describe it, and what is worth counting.
-# A component whose tree is absent is reported as absent rather than skipped:
-# a missing count and a zero count are different facts.
+# One entry per component: where to clone it from, how to describe it, and what
+# is worth counting. A component this run could not clone is reported as such
+# rather than skipped: a missing count and a zero count are different facts.
 COMPONENTS: list[dict[str, object]] = [
     {
         "path": "cesm/PyCAM5",
+        "url": "https://github.com/a85tract/PyCAM5.git",
         "pipeline": 1,
         "counts": [
             ("runtime selectors", "selectors"),
@@ -53,10 +65,21 @@ COMPONENTS: list[dict[str, object]] = [
             ("exported routines", "codon_exports"),
         ],
     },
-    {"path": "cesm/freeCAM", "pipeline": 1, "counts": [("Python files", "py_files")]},
-    {"path": "cesm/PyCCPP", "pipeline": 1, "counts": [("Fortran files", "f90_files")]},
+    {
+        "path": "cesm/freeCAM",
+        "url": "https://github.com/a85tract/freeCAM.git",
+        "pipeline": 1,
+        "counts": [("Python files", "py_files")],
+    },
+    {
+        "path": "cesm/PyCCPP",
+        "url": "https://github.com/a85tract/PyCCPP.git",
+        "pipeline": 1,
+        "counts": [("Fortran files", "f90_files")],
+    },
     {
         "path": "cesm/JaxCAM6",
+        "url": "https://github.com/a85tract/CESM-jax-kernels.git",
         "pipeline": 2,
         "counts": [
             ("schemes", "schemes"),
@@ -66,6 +89,7 @@ COMPONENTS: list[dict[str, object]] = [
     },
     {
         "path": "cesm/NumbaCAM6",
+        "url": "https://github.com/a85tract/CESM-numba-kernels.git",
         "pipeline": 2,
         "counts": [
             ("schemes", "schemes"),
@@ -73,7 +97,12 @@ COMPONENTS: list[dict[str, object]] = [
             ("test files", "test_files"),
         ],
     },
-    {"path": "cesm/CC-Test", "pipeline": 0, "counts": [("tools", "tool_files")]},
+    {
+        "path": "cesm/CC-Test",
+        "url": "https://github.com/a85tract/CESM-CC-Test.git",
+        "pipeline": 0,
+        "counts": [("tools", "tool_files")],
+    },
 ]
 
 SCHEME_DIRS_IGNORED = {"tests", "utils", "__pycache__", "docs"}
@@ -86,8 +115,66 @@ def git(args: list[str], cwd: Path) -> str:
     return out.stdout.strip() if out.returncode == 0 else ""
 
 
+def run_git(args: list[str], cwd: Path) -> bool:
+    """Whether a git command succeeded, for the ones run for effect not output.
+
+    ``GIT_TERMINAL_PROMPT=0`` is what makes "cannot clone" a return value rather
+    than a hang: a private repository the caller has no credentials for would
+    otherwise stop at a username prompt -- forever on a CI runner, and in the
+    middle of a developer's run for no reason, since the whole design here is
+    that an unreadable component carries its previous row forward.
+    """
+    return subprocess.run(  # noqa: S603 -- git, on a path we control
+        ["git", *args],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        check=False,
+        env={**os.environ, "GIT_TERMINAL_PROMPT": "0", "GIT_ASKPASS": ""},
+    ).returncode == 0
+
+
+def checkout(url: str, dest: Path) -> Path | None:
+    """A shallow clone of ``url``'s default branch at ``dest``, or ``None``.
+
+    Several component repositories are private, so a clone that fails is an
+    expected outcome rather than an error: the caller carries the previous row
+    forward and the footnote says which ones were not re-counted. Hence a
+    return value and not an exception.
+
+    The default branch is the one thing this tool does not choose. Each
+    component decides what its own tip is -- ``PyCCPP`` publishes
+    ``pyphys/framework`` and the rest publish ``main`` -- and cloning without a
+    ref asks the remote, so a component moving its default branch does not need
+    a change here.
+    """
+    if (dest / ".git").exists():
+        # A reused checkout directory: move it to the current tip rather than
+        # counting whatever the last run happened to leave behind.
+        moved = (
+            run_git(["fetch", "--quiet", "--depth", "1", "origin", "HEAD"], dest)
+            and run_git(["reset", "--quiet", "--hard", "FETCH_HEAD"], dest)
+            and run_git(["clean", "-qfdx"], dest)
+        )
+        return dest if moved else None
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    cloned = run_git(
+        ["clone", "--quiet", "--depth", "1", url, dest.name], dest.parent
+    )
+    return dest if cloned else None
+
+
+def checkouts(base: Path) -> dict[str, Path | None]:
+    """One clone per component plus the engine, keyed by the name each is known
+    by on the pages. A ``None`` means this run could not read that component."""
+    wanted = [(ENGINE_NAME, ENGINE_URL)] + [
+        (str(e["path"]), str(e["url"])) for e in COMPONENTS
+    ]
+    return {name: checkout(url, base / name) for name, url in wanted}
+
+
 def revision(path: Path) -> tuple[str, str]:
-    """``(short sha, commit date)`` of a checked-out submodule.
+    """``(short sha, commit date)`` of a checkout.
 
     The length is pinned rather than left to ``--short``, whose default follows
     each repository's ``core.abbrev`` -- a developer and a CI runner would
@@ -181,8 +268,8 @@ def verifications(path: Path) -> list[dict[str, object]]:
 def previous_rows(text: str) -> dict[str, str]:
     """The rows already in the README, by component.
 
-    A component this checkout cannot read must not have its counts erased --
-    several of them are private repositories, and a CI run holding fewer keys
+    A component this run cannot clone must not have its counts erased --
+    several of them are private repositories, and a run holding fewer keys
     than a developer would otherwise overwrite real numbers with blanks. The
     previous row is carried forward verbatim and the footnote says which ones
     were not re-counted.
@@ -199,24 +286,24 @@ def previous_rows(text: str) -> dict[str, str]:
     return rows
 
 
-def inventory_block(text: str) -> str:
+def inventory_block(text: str, trees: dict[str, Path | None]) -> str:
     carried_from = previous_rows(text)
     rows = [
-        "| Component | Pinned revision | Last commit | Counted |",
+        "| Component | Revision counted | Last commit | Counted |",
         "|---|---|---|---|",
     ]
     missing, carried = [], []
     for entry in COMPONENTS:
-        path = ROOT / str(entry["path"])
-        name = path.name
-        readable = path.is_dir() and any(path.iterdir())
-        if not readable:
+        slug = str(entry["path"])
+        name = slug.rsplit("/", 1)[-1]
+        path = trees.get(slug)
+        if path is None:
             if name in carried_from:
                 rows.append(carried_from[name])
                 carried.append(name)
             else:
                 missing.append(name)
-                rows.append(f"| `{name}` | — | — | not checked out |")
+                rows.append(f"| `{name}` | — | — | not cloned |")
             continue
         sha, date = revision(path)
         numbers = measure(path)
@@ -237,29 +324,30 @@ def inventory_block(text: str) -> str:
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     note = [
         "",
-        f"*Counted by `tools/refresh_dashboard.py` at {stamp}, from the submodule "
-        "revisions above. Re-run it after `git submodule update --remote`; every "
-        "number here is reproducible from the pinned revision beside it.*",
+        f"*Counted by `tools/refresh_dashboard.py` at {stamp}, from a fresh clone of "
+        "each component's default branch. Re-run it to bring the numbers to the "
+        "current tips; every number here is reproducible from the revision beside "
+        "it.*",
     ]
     if carried:
         note.append("")
         note.append(
             "*Carried forward, not re-counted here: "
             + ", ".join(f"`{c}`" for c in carried)
-            + " — those trees were not readable in this checkout (several component "
-            "repositories are private), so their previous counts and revisions stand.*"
+            + " — this run could not clone those (several component repositories "
+            "are private), so their previous counts and revisions stand.*"
         )
     if missing:
         note.append("")
         note.append(
             "*Never counted: "
             + ", ".join(f"`{m}`" for m in missing)
-            + " — run `git submodule update --init --recursive` and re-run.*"
+            + " — no run that could clone those has written this table yet.*"
         )
     return "\n".join(rows + note)
 
 
-def gates_block() -> str:
+def gates_block(trees: dict[str, Path | None]) -> str:
     """Every committed gate conclusion, across components.
 
     This is the table the front page could not previously carry at all: not
@@ -275,8 +363,8 @@ def gates_block() -> str:
     ]
     total = 0
     for entry in COMPONENTS:
-        path = ROOT / str(entry["path"])
-        if not (path.is_dir() and any(path.iterdir())):
+        path = trees.get(str(entry["path"]))
+        if path is None:
             continue
         for gate in verifications(path):
             total += 1
@@ -300,16 +388,14 @@ def gates_block() -> str:
     return "\n".join(rows)
 
 
-def headline_block() -> str:
-    """One line for the README: how much is pinned, and what has been gated.
+def headline_block(trees: dict[str, Path | None]) -> str:
+    """One line for the README: how much was counted, and what has been gated.
 
     Deliberately not a table. The README's job is to point at the page, and a
     summary that grows into a second inventory is how the two drift apart.
     """
-    pinned = sum(
-        1 for e in COMPONENTS if (ROOT / str(e["path"])).is_dir() and any((ROOT / str(e["path"])).iterdir())
-    )
-    gates = [g for e in COMPONENTS for g in verifications(ROOT / str(e["path"]))]
+    counted = [t for t in (trees.get(str(e["path"])) for e in COMPONENTS) if t is not None]
+    gates = [g for tree in counted for g in verifications(tree)]
     by_confidence: dict[str, int] = {}
     for gate in gates:
         key = str(gate.get("confidence", "unknown"))
@@ -320,13 +406,13 @@ def headline_block() -> str:
     else:
         verdicts = "no gate conclusions committed yet"
     return (
-        f"**{pinned} of {len(COMPONENTS)} components checked out here; {verdicts}.** "
+        f"**{len(counted)} of {len(COMPONENTS)} components counted; {verdicts}.** "
         "See the page for the inventory, the per-scheme progress, and what each figure "
         "was measured against."
     )
 
 
-def plugins_block() -> str:
+def plugins_block(engine: Path | None) -> str:
     """What the engine registers, read from its own entry points.
 
     The engine's capabilities arrive through ``importlib.metadata`` entry
@@ -335,11 +421,11 @@ def plugins_block() -> str:
     by hand would produce a page that claims capabilities a checkout may not
     have.
     """
-    manifest = ENGINE / "pyproject.toml"
-    if not manifest.is_file():
+    manifest = engine / "pyproject.toml" if engine else None
+    if manifest is None or not manifest.is_file():
         return (
-            "*Not counted: the `RecastEngine` submodule is not checked out here. "
-            "Run `git submodule update --init` and re-run.*"
+            "*Not counted: this run could not clone `RecastEngine`, or the clone "
+            "carries no `pyproject.toml`.*"
         )
     kinds: dict[str, list[str]] = {}
     current = None
@@ -360,10 +446,10 @@ def plugins_block() -> str:
     for kind in [k for k in order if k in kinds] + [k for k in kinds if k not in order]:
         names = ", ".join(f"`{n}`" for n in sorted(kinds[kind]))
         rows.append(f"| {kind} | {names or '—'} |")
-    sha = git(["rev-parse", "HEAD"], ENGINE)[:7]
+    sha = git(["rev-parse", "HEAD"], engine)[:7]
     rows += [
         "",
-        f"*Read from `RecastEngine/pyproject.toml` at `{sha}`. A domain package adds to this "
+        f"*Read from `RecastEngine`'s `pyproject.toml` at `{sha}`. A domain package adds to this "
         "list by declaring the same entry-point groups -- `recast-cesm` supplies the `cesm` "
         "frontend, the `translate.cam` transform and the `translate-cam` recipe that way, "
         "with no change to the engine.*",
@@ -371,15 +457,17 @@ def plugins_block() -> str:
     return "\n".join(rows)
 
 
-def engine_verdicts_block() -> str:
+def engine_verdicts_block(engine: Path | None) -> str:
     """The engine example's own gate conclusions, from the summary it commits."""
-    summaries = [
-        s for s in sorted(ENGINE.rglob("verification.json")) if "work" not in s.parts
-    ]
+    summaries = (
+        [s for s in sorted(engine.rglob("verification.json")) if "work" not in s.parts]
+        if engine
+        else []
+    )
     if not summaries:
         return (
-            "*Not counted: the `RecastEngine` submodule is not checked out here, or its "
-            "example has not been run. Run `git submodule update --init` and re-run.*"
+            "*Not counted: this run could not clone `RecastEngine`, or its example "
+            "commits no summary.*"
         )
     rows = ["| Unit | Verifier | Confidence | Metrics |", "|---|---|---|---|"]
     for summary in summaries:
@@ -399,7 +487,7 @@ def engine_verdicts_block() -> str:
                     f"| `{unit['unit']}` | `{verdict['verifier']}` "
                     f"| **{verdict['confidence']}** | {shown or '—'} |"
                 )
-    sha = git(["rev-parse", "HEAD"], ENGINE)[:7]
+    sha = git(["rev-parse", "HEAD"], engine)[:7]
     rows += [
         "",
         f"*Read from the summaries committed in `RecastEngine` at `{sha}`. The engine's CI "
@@ -425,28 +513,44 @@ def main() -> int:
         action="store_true",
         help="do not write; exit non-zero if the generated blocks are out of date",
     )
+    ap.add_argument(
+        "--checkout-dir",
+        type=Path,
+        default=None,
+        help="keep the clones here and reuse them next run, instead of a scratch "
+        "directory discarded on exit",
+    )
     ns = ap.parse_args()
 
-    page_before = PAGE.read_text()
-    page_after = rewrite(page_before, "inventory", inventory_block(page_before))
-    page_after = rewrite(page_after, "gates", gates_block())
+    with contextlib.ExitStack() as stack:
+        if ns.checkout_dir:
+            base = ns.checkout_dir.expanduser()
+            base.mkdir(parents=True, exist_ok=True)
+        else:
+            base = Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="scirecast-")))
+        trees = checkouts(base)
 
-    engine_before = ENGINE_PAGE.read_text()
-    engine_after = rewrite(engine_before, "plugins", plugins_block())
-    engine_after = rewrite(engine_after, "engine-verdicts", engine_verdicts_block())
+        page_before = PAGE.read_text()
+        page_after = rewrite(page_before, "inventory", inventory_block(page_before, trees))
+        page_after = rewrite(page_after, "gates", gates_block(trees))
 
-    readme_before = README.read_text()
-    readme_after = rewrite(readme_before, "headline", headline_block())
+        engine = trees.get(ENGINE_NAME)
+        engine_before = ENGINE_PAGE.read_text()
+        engine_after = rewrite(engine_before, "plugins", plugins_block(engine))
+        engine_after = rewrite(engine_after, "engine-verdicts", engine_verdicts_block(engine))
+
+        readme_before = README.read_text()
+        readme_after = rewrite(readme_before, "headline", headline_block(trees))
 
     if ns.check:
         # Compare the page's table rows only. The timestamp moves every run and
-        # the provenance footnote describes *this checkout's* visibility -- a CI
-        # runner holding fewer keys than a developer says so in the footnote and
-        # would otherwise report a stale dashboard on every pull request. The
-        # README's headline is compared whole, being one line with no clock in it.
+        # the provenance footnote describes *this run's* visibility -- a run
+        # holding fewer keys than a developer says so in the footnote and would
+        # otherwise report a stale dashboard every time. The README's headline is
+        # compared whole, being one line with no clock in it.
         stale = []
         if previous_rows(page_before) != previous_rows(page_after):
-            stale.append("index.md")
+            stale.append(PAGE.name)
             for name, row in previous_rows(page_after).items():
                 if previous_rows(page_before).get(name) != row:
                     print(f"  {name}:", file=sys.stderr)

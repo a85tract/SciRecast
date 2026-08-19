@@ -40,7 +40,7 @@ there is no privileged built-in path, which is what makes a domain package like
 | store | `fs-evidence`, `fs-findings` |
 | recipe | `audit`, `port`, `refactor`, `translate` |
 
-*Read from `RecastEngine/pyproject.toml` at `c4d29bc`. A domain package adds to this list by declaring the same entry-point groups -- `recast-cesm` supplies the `cesm` frontend, the `translate.cam` transform and the `translate-cam` recipe that way, with no change to the engine.*
+*Read from `RecastEngine`'s `pyproject.toml` at `6333399`. A domain package adds to this list by declaring the same entry-point groups -- `recast-cesm` supplies the `cesm` frontend, the `translate.cam` transform and the `translate-cam` recipe that way, with no change to the engine.*
 <!-- /generated:plugins -->
 
 ## What the gates concluded, on the engine's own example
@@ -59,7 +59,7 @@ README claims.
 | `fortran:toy_physics` | `differential.bitexact` | **bit_exact** | bit_exact=85, max_ulp=0, points=85 |
 | `fortran:toy_physics` | `symbolic.notary` | **symbolic** | rewrites=0 |
 
-*Read from the summaries committed in `RecastEngine` at `c4d29bc`. The engine's CI regenerates them on a clean machine and fails on any difference, so a verdict here is what a fresh run concludes rather than what was true once.*
+*Read from the summaries committed in `RecastEngine` at `6333399`. The engine's CI regenerates them on a clean machine and fails on any difference, so a verdict here is what a fresh run concludes rather than what was true once.*
 <!-- /generated:engine-verdicts -->
 
 ## Reading further

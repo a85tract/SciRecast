@@ -1,16 +1,15 @@
 name: dashboard
 
-# The counted half of the README is generated from the submodules. This keeps
-# it honest two ways: it refuses a pull request whose counts no longer match
-# the pinned revisions, and it refreshes weekly so a component advancing does
-# not silently age the numbers on the front page.
+# The counted half of the pages is generated from the component repositories.
+# This keeps it honest two ways: it refuses a pull request whose counts no
+# longer match what the components contain, and it refreshes weekly so a
+# component advancing does not silently age the numbers on the front page.
 #
-# Submodules are checked out one at a time, on purpose. Several component
-# repositories are private, and `submodules: true` aborts the whole checkout at
-# the first clone it cannot do -- the same failure mode that keeps Sec-Track
-# linked rather than submoduled. A component the runner cannot read is reported
-# by the generator as not counted, which is the honest result; the alternative
-# is a workflow that only ever runs for people holding every key.
+# Nothing is checked out here beyond this repository. The generator clones each
+# component itself, and a component this runner cannot clone -- several are
+# private -- carries its previous row forward and says so in the footnote.
+# That is the honest result; the alternative is a workflow that only ever runs
+# for people holding every key.
 
 # Automatic runs are off while the Actions allowance is exhausted. Restore the
 # pull_request trigger and the Monday 06:17 UTC schedule when the quota resets.
@@ -26,18 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Check out whichever submodules this token can read
-        run: |
-          for path in $(git config -f .gitmodules --get-regexp '^submodule\..*\.path$' | awk '{print $2}'); do
-            if git submodule update --init --depth 1 -- "$path" 2>/dev/null; then
-              echo "  ok       $path"
-            else
-              echo "  private  $path (not counted)"
-              git submodule deinit -f -- "$path" >/dev/null 2>&1 || true
-            fi
-          done
-
-      - name: Verify the generated block matches the trees present
+      - name: Verify the generated blocks match what the components contain
         if: github.event_name == 'pull_request'
         run: python tools/refresh_dashboard.py --check
 
@@ -45,11 +33,13 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           python tools/refresh_dashboard.py
-          if git diff --quiet README.md; then
+          # All three pages carry generated blocks; committing only the README
+          # would push a front page that disagrees with the pages behind it.
+          if git diff --quiet README.md cesm.md engine.md; then
             echo "counts unchanged"
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Refresh the generated dashboard counts" README.md
+          git commit -m "Refresh the generated dashboard counts" README.md cesm.md engine.md
           git push

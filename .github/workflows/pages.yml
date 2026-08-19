@@ -2,7 +2,7 @@ name: pages
 
 # Publishes the dashboard: one page per tab, the tab bar built from each page's
 # own front matter. The README is the short way in and restates none of it; the
-# counted blocks are written by tools/refresh_dashboard.py from the submodules,
+# counted blocks are written by tools/refresh_dashboard.py from the components,
 # so the site and the repository cannot drift into two sets of numbers.
 
 # Automatic runs are off while the Actions allowance is exhausted. Restore the
@@ -24,9 +24,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # No submodules: the site is a handful of markdown files, and several
-      # component repositories are private -- checking them out here would fail
-      # the job for nothing.
+      # Nothing to fetch beyond this repository: the site is a handful of
+      # markdown files, and the counted blocks in them were written by the
+      # dashboard workflow before they ever got here.
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
       - uses: actions/jekyll-build-pages@v1
