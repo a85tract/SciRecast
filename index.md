@@ -26,17 +26,18 @@ the validation & security infrastructure); **the agent produces the outermost on
 after the artifact passes the gates.
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 22, "subGraphTitleMargin": {"top": 0, "bottom": 24}}}}%%
 flowchart TB
-    subgraph Product["🟦 Product Layer — modernized software (CESM case)"]
+    subgraph Product["🟦 Product Layer"]
         PyCAM5["PyCAM5 · freeCAM"]
         JaxCAM6["JaxCAM6 · NumbaCAM6"]
     end
-    subgraph Support["🟩 Support Layer — Validation &amp; Security"]
-        CCTest["CC-Test"]
-        SecTrack["Sec-Track"]
+    subgraph Support["🟩 Support Layer"]
+        CCTest["CC-Test<br/>correctness · cyber CI"]
+        SecTrack["Sec-Track<br/>vulnerability record"]
     end
-    subgraph Core["🟥 Core Layer — RecastEngine"]
-        Engine["multi-LLM-agent, neuro-symbolic"]
+    subgraph Core["🟥 Core Layer"]
+        Engine["RecastEngine<br/>multi-LLM-agent, neuro-symbolic"]
     end
 
     Engine -- "translate · refactor · port to accelerators" --> Product
