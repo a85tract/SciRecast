@@ -74,16 +74,3 @@ it — maintained there, and nowhere twice.
 **Who changes what** follows from the layering: humans maintain the inner two,
 the agent produces the outermost, and nobody edits generated output by hand. The
 [Contributing](contribute) page says why, and where to send what.
-
----
-
-## Why an umbrella repository at all
-
-Because the submodule pointers are a record, not decoration. This repository at a given commit
-pins one exact revision of the engine and one of the case, so a result can be reproduced from a
-single hash: `git submodule update --init --recursive` and you have the tree that produced it.
-The `Advance <component> to <sha>` commits in the history are that record over time, and the
-hooks in [`hooks/`](hooks/) (install with [`tools/install-hooks.sh`](tools/install-hooks.sh))
-are what keep the pointers from silently falling behind the work.
-
----
