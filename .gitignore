@@ -8,3 +8,10 @@
 
 # macOS
 .DS_Store
+
+# Working clones that are not submodules of this repository. PyCAM5 is pinned at
+# cesm/PyCAM5; a second copy at the top level was a scratch clone and adding it
+# would ship an embedded repository nobody can fetch.
+/PyCAM5/
+/CESM-language-translator/
+/recast-cesm/
