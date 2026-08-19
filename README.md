@@ -15,6 +15,12 @@ Run `git submodule update --init` to populate both. Going deeper with
 `--recursive` will stop on the component repositories that are not public yet —
 follow the links in the case repository instead.
 
+> **What is written where.** This file describes the ecosystem's *architecture*: what the
+> three layers are, why the boundaries fall where they do, and how a case attaches. It
+> carries **no status, no metrics, and no per-component detail** on purpose — those live in
+> the case repository and in each component's own README. A number maintained in two places
+> is a number that will eventually disagree with itself.
+
 ---
 
 ## The Three Layers, Seen Through the CESM Case
@@ -44,31 +50,47 @@ flowchart TB
     SecTrack -- "gate" --> Product
 ```
 
-**🟥 Core Layer — [`RecastEngine`](https://github.com/a85tract/RecastEngine).** A multi-LLM-agent engine that combines the
-generative power of LLMs with the rigor of formal methods (neuro-symbolic). It translates
-languages, refactors architectures, ports code to accelerators, retrieves CC-Test for
-correctness validation, and stores security analyses to Sec-Track. In the CESM case it drives
-the deterministic Fortran → Python translation pipeline (SymPy-based); the ZM and MG2 schemes
-are verified bit-exact.
+**🟥 Core Layer — [`RecastEngine`](https://github.com/a85tract/RecastEngine).** A multi-LLM-agent
+engine that combines the generative power of LLMs with the rigor of formal methods
+(neuro-symbolic). It translates languages, refactors architectures, ports code to
+accelerators, and gates every result against the original. The engine knows nothing about any
+particular model: domain knowledge attaches through its published plugin contract, which is
+what makes a second case possible without rebuilding anything. Its own
+[`docs/architecture.md`](https://github.com/a85tract/RecastEngine/blob/main/docs/architecture.md)
+carries the spine, the ten interfaces, and where the boundaries fall.
 
-**🟩 Support Layer — the trust foundation.** *CC-Test* is a CI/CD workflow covering both
-**C**orrectness and **C**yber testing; its Cyber half is a working DevSecOps gate (secret
-scanning, SBOM + CVE + VEX, AI code audit, sanitizer builds), verified on NCAR's Derecho.
-*Sec-Track* is a restricted-access record of N-day and responsibly disclosed 0-day
-vulnerabilities across the software, its supply chain, and its runtime.
+**🟩 Support Layer — the trust foundation.** *CC-Test* is the CI/CD workflow covering both
+**C**orrectness and **C**yber testing; *Sec-Track* is the restricted-access record of N-day and
+responsibly disclosed vulnerabilities across the software, its supply chain, and its runtime.
+This is a separate layer because a gate the gated thing can influence is not a gate — what
+these two check, and how strictly, is deliberately not the engine's decision to make. The CESM
+case's instances of both, with their operational detail, are in the case repository.
 
-**🟦 Product Layer — the modernized software itself.** For CESM this runs as two pipelines:
-CAM5 rewritten to modular Python (`PyCAM5`, `freeCAM`, `PyCCPP`), and CAM6 physics kernels
-ported to GPUs (`JaxCAM6`, `NumbaCAM6`).
+**🟦 Product Layer — the modernized software itself.** Modernized artifacts are *outputs*, not
+components: what comes out when the engine, the domain knowledge, and the legacy source are
+put together. Humans do not hand-maintain this layer. For CESM, the products and their
+per-scheme status are tracked in the case repository.
 
-Both of these layers are assembled in the case repository — see
-**[`CESM-modernization-overview`](https://github.com/a85tract/CESM-modernization-overview)** for
-the component repositories, per-scheme progress, and validated-run evidence.
+**Where the case lives.** Component repositories, pipeline structure, per-scheme progress, and
+validated-run evidence are all in
+**[`CESM-modernization-overview`](https://github.com/a85tract/CESM-modernization-overview)** —
+the only place any of it is maintained.
 
 **Contribution model.** Human developers do **not** directly modify the Product Layer. When end
 users open issues, RecastEngine generates, tests, and merges the fixes. Humans contribute to the
 Core Layer (new formal methods and agentic designs) and to the Support Layer (benchmark suites,
 validation workflows, vulnerability reports).
+
+---
+
+## Why an umbrella repository at all
+
+Because the submodule pointers are a record, not decoration. This repository at a given commit
+pins one exact revision of the engine and one of the case, so a result can be reproduced from a
+single hash: `git submodule update --init --recursive` and you have the tree that produced it.
+The `Advance <component> to <sha>` commits in the history are that record over time, and the
+hooks in [`hooks/`](hooks/) (install with [`tools/install-hooks.sh`](tools/install-hooks.sh))
+are what keep the pointers from silently falling behind the work.
 
 ---
 
