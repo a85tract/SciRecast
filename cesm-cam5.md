@@ -1,6 +1,7 @@
 ---
-title: CESM · CAM5 → Python
-nav_order: 3
+title: CAM5 → Python
+parent: CESM Case
+parent_url: cesm
 ---
 
 The first pipeline: rewrite CAM5's physics into Python and decouple it, keeping bit-for-bit agreement with the native Fortran.

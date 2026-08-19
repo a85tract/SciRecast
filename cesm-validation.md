@@ -1,6 +1,7 @@
 ---
-title: CESM · Validation
-nav_order: 5
+title: Validation & Security
+parent: CESM Case
+parent_url: cesm
 ---
 
 Shared by both pipelines: the gates every artifact has to pass, and the record of what was found.

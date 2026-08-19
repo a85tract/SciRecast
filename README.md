@@ -10,14 +10,13 @@ only after passing correctness validation and security review.
 | Tab | What is on it |
 |---|---|
 | [Architecture](https://a85tract.github.io/SciRecast/) | the three layers, why the boundaries fall where they do, how a case attaches |
-| [CESM · Status](https://a85tract.github.io/SciRecast/cesm-status) | component inventory and gate conclusions, generated from the submodules |
-| [CESM · CAM5 → Python](https://a85tract.github.io/SciRecast/cesm-cam5) | PyCAM5, freeCAM, PyCCPP |
-| [CESM · CAM6 → GPU](https://a85tract.github.io/SciRecast/cesm-cam6) | per-scheme progress, kernels, deployment, run archive, open items |
-| [CESM · Validation](https://a85tract.github.io/SciRecast/cesm-validation) | CC-Test and Sec-Track |
+| [RecastEngine](https://a85tract.github.io/SciRecast/engine) | the spine, what is registered, and what the engine's own gates conclude |
+| [CESM Case](https://a85tract.github.io/SciRecast/cesm) | the first case: inventory, gate conclusions, and three pages of detail beneath it |
+| [Contributing](https://a85tract.github.io/SciRecast/contributing) | who changes what, where to send it, how to extend the engine |
 
 This README is the thirty-second version and links onward rather than restating. Each section
-lives in exactly one page source (`index.md`, `cesm-status.md`, …); the counted half of the
-Status tab is generated from the submodules by
+lives in exactly one page source (`index.md`, `engine.md`, `cesm.md`, …); the counted parts of
+the engine and CESM pages are generated from the submodules by
 [`tools/refresh_dashboard.py`](tools/refresh_dashboard.py), so a figure there is never older
 than the revision printed beside it.
 

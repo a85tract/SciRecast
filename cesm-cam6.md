@@ -1,6 +1,7 @@
 ---
-title: CESM · CAM6 → GPU
-nav_order: 4
+title: CAM6 → GPU
+parent: CESM Case
+parent_url: cesm
 ---
 
 The second pipeline: port CAM6's physics kernels to Python/JAX and Numba on GPUs, validated scheme by scheme against native CESM output.

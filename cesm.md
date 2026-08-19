@@ -1,18 +1,26 @@
 ---
-title: CESM · Status
-nav_order: 2
+title: CESM Case
+nav_order: 3
 ---
 
 # CESM/CAM Modernization
 
 SciRecast's first case: rewriting CESM/CAM's physics, with the native Fortran
-kept as the reference and every artifact gated against it.
+kept as the reference and every artifact gated against it. Two pipelines, one
+shared validation layer.
 
-Two halves on these CESM tabs, and the difference matters when you read a number.
-The **inventory** and **gate conclusions** on this tab are generated from the
+| | Read on |
+|---|---|
+| PyCAM5, freeCAM, PyCCPP — the CAM5 → Python pipeline | [CAM5 → Python](cesm-cam5) |
+| JaxCAM6, NumbaCAM6 — the CAM6 → GPU pipeline, per-scheme progress | [CAM6 → GPU](cesm-cam6) |
+| CC-Test and Sec-Track — the gates both pipelines pass | [Validation & Security](cesm-validation) |
+
+Two halves across these pages, and the difference matters when you read a
+number. The **inventory** and **gate conclusions** below are generated from the
 submodules themselves by
 [`tools/refresh_dashboard.py`](https://github.com/a85tract/SciRecast/blob/main/tools/refresh_dashboard.py),
-each figure beside the revision it was counted at. Everything on the other CESM tabs is **human assessment** and carries its own date.
+each figure beside the revision it was counted at. Everything on the three pages
+linked above is **human assessment** and carries its own date.
 
 ## Component Inventory
 
@@ -30,7 +38,7 @@ beside the revision it was counted at, so it can be re-derived rather than trust
 | `NumbaCAM6` | `c86638f` | 2026-07-06 | 4 schemes, 19,993 kernel lines, 62 test files |
 | `CC-Test` | `49af867` | 2026-08-13 | 3 tools |
 
-*Counted by `tools/refresh_dashboard.py` at 2026-08-19 06:02 UTC, from the submodule revisions above. Re-run it after `git submodule update --remote`; every number here is reproducible from the pinned revision beside it.*
+*Counted by `tools/refresh_dashboard.py` at 2026-08-19 06:14 UTC, from the submodule revisions above. Re-run it after `git submodule update --remote`; every number here is reproducible from the pinned revision beside it.*
 <!-- /generated:inventory -->
 
 ### Gate conclusions

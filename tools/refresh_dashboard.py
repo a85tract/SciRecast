@@ -31,9 +31,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 README = ROOT / "README.md"
-PAGE = ROOT / "cesm-status.md"
-"""Two targets, and the split is the point. ``cesm-status.md`` is the CESM
-case's status tab -- the inventory and the gate conclusions in full.
+PAGE = ROOT / "cesm.md"
+ENGINE_PAGE = ROOT / "engine.md"
+ENGINE = ROOT / "RecastEngine"
+"""Two targets, and the split is the point. ``cesm.md`` is the CESM
+case's page -- the inventory and the gate conclusions in full.
 ``README.md`` is the thirty-second version and carries one generated line, not a second copy of the
 tables: a table maintained in two places is a table that will disagree with
 itself, which is the failure this tool exists to end."""
@@ -324,6 +326,89 @@ def headline_block() -> str:
     )
 
 
+def plugins_block() -> str:
+    """What the engine registers, read from its own entry points.
+
+    The engine's capabilities arrive through ``importlib.metadata`` entry
+    points, including its own -- there is no privileged built-in path. So the
+    authoritative list is the engine's ``pyproject.toml``, and copying it here
+    by hand would produce a page that claims capabilities a checkout may not
+    have.
+    """
+    manifest = ENGINE / "pyproject.toml"
+    if not manifest.is_file():
+        return (
+            "*Not counted: the `RecastEngine` submodule is not checked out here. "
+            "Run `git submodule update --init` and re-run.*"
+        )
+    kinds: dict[str, list[str]] = {}
+    current = None
+    for line in manifest.read_text().splitlines():
+        stripped = line.strip()
+        header = re.fullmatch(r'\[project\.entry-points\."recast\.(\w+)"\]', stripped)
+        if header:
+            current = header.group(1).rstrip("s")
+            kinds.setdefault(current, [])
+            continue
+        if stripped.startswith("["):
+            current = None
+            continue
+        if current and "=" in stripped and not stripped.startswith("#"):
+            kinds[current].append(stripped.split("=", 1)[0].strip().strip('"'))
+    rows = ["| Kind | Registered |", "|---|---|"]
+    order = ["frontend", "transform", "oracle", "verifier", "executor", "store", "recipe"]
+    for kind in [k for k in order if k in kinds] + [k for k in kinds if k not in order]:
+        names = ", ".join(f"`{n}`" for n in sorted(kinds[kind]))
+        rows.append(f"| {kind} | {names or '—'} |")
+    sha = git(["rev-parse", "HEAD"], ENGINE)[:7]
+    rows += [
+        "",
+        f"*Read from `RecastEngine/pyproject.toml` at `{sha}`. A domain package adds to this "
+        "list by declaring the same entry-point groups -- `recast-cesm` supplies the `cesm` "
+        "frontend, the `translate.cam` transform and the `translate-cam` recipe that way, "
+        "with no change to the engine.*",
+    ]
+    return "\n".join(rows)
+
+
+def engine_verdicts_block() -> str:
+    """The engine example's own gate conclusions, from the summary it commits."""
+    summaries = [
+        s for s in sorted(ENGINE.rglob("verification.json")) if "work" not in s.parts
+    ]
+    if not summaries:
+        return (
+            "*Not counted: the `RecastEngine` submodule is not checked out here, or its "
+            "example has not been run. Run `git submodule update --init` and re-run.*"
+        )
+    rows = ["| Unit | Verifier | Confidence | Metrics |", "|---|---|---|---|"]
+    for summary in summaries:
+        try:
+            record = json.loads(summary.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        for unit in record.get("units", []):
+            for verdict in unit.get("verdicts", []):
+                metrics = verdict.get("metrics", {})
+                shown = ", ".join(
+                    f"{k}={v}"
+                    for k, v in sorted(metrics.items())
+                    if k in ("points", "bit_exact", "max_ulp", "blocks_checked", "rewrites")
+                )
+                rows.append(
+                    f"| `{unit['unit']}` | `{verdict['verifier']}` "
+                    f"| **{verdict['confidence']}** | {shown or '—'} |"
+                )
+    sha = git(["rev-parse", "HEAD"], ENGINE)[:7]
+    rows += [
+        "",
+        f"*Read from the summaries committed in `RecastEngine` at `{sha}`. The engine's CI "
+        "regenerates them on a clean machine and fails on any difference, so a verdict here "
+        "is what a fresh run concludes rather than what was true once.*",
+    ]
+    return "\n".join(rows)
+
+
 def rewrite(text: str, name: str, body: str) -> str:
     start, end = f"<!-- generated:{name} -->", f"<!-- /generated:{name} -->"
     if start not in text or end not in text:
@@ -346,6 +431,10 @@ def main() -> int:
     page_after = rewrite(page_before, "inventory", inventory_block(page_before))
     page_after = rewrite(page_after, "gates", gates_block())
 
+    engine_before = ENGINE_PAGE.read_text()
+    engine_after = rewrite(engine_before, "plugins", plugins_block())
+    engine_after = rewrite(engine_after, "engine-verdicts", engine_verdicts_block())
+
     readme_before = README.read_text()
     readme_after = rewrite(readme_before, "headline", headline_block())
 
@@ -366,6 +455,8 @@ def main() -> int:
                         file=sys.stderr,
                     )
                     print(f"    measured: {row}", file=sys.stderr)
+        if engine_before != engine_after:
+            stale.append("engine.md")
         if readme_before != readme_after:
             stale.append("README.md")
         if not stale:
@@ -377,6 +468,7 @@ def main() -> int:
     written = []
     for target, before, after in (
         (PAGE, page_before, page_after),
+        (ENGINE_PAGE, engine_before, engine_after),
         (README, readme_before, readme_after),
     ):
         if after != before:

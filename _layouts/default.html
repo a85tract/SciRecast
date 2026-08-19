@@ -46,6 +46,9 @@
       border-color: var(--line); font-weight: 600;
     }
     main { padding: 32px 0 64px; }
+    /* A page below a tab says so, rather than leaving the reader to guess which
+       tab they are inside from a nav bar that highlights none of them. */
+    .crumb { margin: -8px 0 20px; font-size: 14px; }
     main h1 { font-size: 28px; margin-top: 0; }
     main h2 { font-size: 21px; margin-top: 2em; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
     main h3 { font-size: 17px; margin-top: 1.8em; }
@@ -74,13 +77,24 @@
       <nav>
         {%- assign tabs = site.pages | where_exp: "p", "p.nav_order" | sort: "nav_order" -%}
         {%- for tab in tabs -%}
+          {%- comment -%}
+            A sub-page keeps its parent's tab lit, so the reader never loses
+            track of which section they are in.
+          {%- endcomment -%}
+          {%- assign lit = false -%}
+          {%- if tab.url == page.url or tab.title == page.parent -%}{%- assign lit = true -%}{%- endif -%}
           <a href="{{ tab.url | relative_url }}"
-             {% if tab.url == page.url %}aria-current="page"{% endif %}>{{ tab.title }}</a>
+             {% if lit %}aria-current="page"{% endif %}>{{ tab.title }}</a>
         {%- endfor -%}
       </nav>
     </div>
   </header>
-  <main class="wrap">{{ content }}</main>
+  <main class="wrap">
+    {%- if page.parent %}
+    <p class="crumb"><a href="{{ page.parent_url | relative_url }}">← {{ page.parent }}</a></p>
+    {%- endif %}
+    {{ content }}
+  </main>
   <footer class="wrap">
     Generated blocks come from
     <a href="https://github.com/a85tract/CESM-modernization-overview/blob/main/tools/refresh_dashboard.py">tools/refresh_dashboard.py</a>;

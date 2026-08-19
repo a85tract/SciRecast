@@ -7,10 +7,17 @@ nav_order: 1
 
 **An open-source, agentic ecosystem for modernizing legacy scientific software.**
 
-LLM agents do the labor-intensive porting work under human oversight; every artifact ships
-only after passing correctness validation and security review. This tab is the architecture:
-what the three layers are, why the boundaries fall where they do, and how a case attaches.
-The CESM tabs are the first case, in detail.
+LLM agents do the labor-intensive porting work under human oversight; every
+artifact ships only after passing correctness validation and security review.
+This page is the architecture — what the three layers are and why the boundaries
+fall where they do. The engine and the first case each have their own:
+
+| | |
+|---|---|
+| **[RecastEngine](engine)** | the engine itself: the spine, the plugin contract, what is registered, and what its own gates conclude |
+| **[CESM Case](cesm)** | the first case: component inventory, per-scheme progress, and every gate conclusion recorded so far |
+| **[Contributing](contributing)** | who changes what, where to send it, and how to extend the engine |
+
 
 ## The Three Layers, Seen Through the CESM Case
 
@@ -60,15 +67,13 @@ components: what comes out when the engine, the domain knowledge, and the legacy
 put together. Humans do not hand-maintain this layer. For CESM, the products and their
 per-scheme status are tracked in the case repository.
 
-**Where the case lives.** Component repositories, pipeline structure, per-scheme progress, and
-validated-run evidence are all in
-**[`CESM-modernization-overview`](https://github.com/a85tract/CESM-modernization-overview)** —
-the only place any of it is maintained.
+**Where the case lives.** Component repositories, pipeline structure, per-scheme progress and
+recorded gate conclusions are all on the **[CESM Case](cesm)** page and the three pages under
+it — maintained there, and nowhere twice.
 
-**Contribution model.** Human developers do **not** directly modify the Product Layer. When end
-users open issues, RecastEngine generates, tests, and merges the fixes. Humans contribute to the
-Core Layer (new formal methods and agentic designs) and to the Support Layer (benchmark suites,
-validation workflows, vulnerability reports).
+**Who changes what** follows from the layering: humans maintain the inner two,
+the agent produces the outermost, and nobody edits generated output by hand. The
+[Contributing](contributing) page says why, and where to send what.
 
 ---
 
@@ -82,15 +87,3 @@ hooks in [`hooks/`](hooks/) (install with [`tools/install-hooks.sh`](tools/insta
 are what keep the pointers from silently falling behind the work.
 
 ---
-
-## Contribution model
-
-Human developers do **not** directly modify the Product Layer. When end users open issues,
-RecastEngine generates, tests, and merges the fixes. Humans contribute to the Core Layer (new
-formal methods and agentic designs) and to the Support Layer (benchmark suites, validation
-workflows, vulnerability reports).
-
-See [`CONTRIBUTING.md`](https://github.com/a85tract/SciRecast/blob/main/CONTRIBUTING.md).
-**Security vulnerabilities:** please do *not* open a public issue — use a private GitHub
-security advisory or email **Yueqi Chen** (University of Colorado Boulder),
-<yueqi.chen@colorado.edu>.
