@@ -29,3 +29,12 @@
 .route th:first-child {
   width: 34%;
 }
+
+// The theme draws a table's vertical rules with border-left on every cell and
+// clears it on :first-of-type -- but that pseudo-class counts per element type,
+// not per row. A row opening with <th scope="row"> therefore makes the first
+// <td> the *second* column, which drops the rule between the key column and the
+// one beside it. Only the header row, being all <th>, escaped it.
+th[scope="row"] + td {
+  border-left: $border $border-color;
+}
