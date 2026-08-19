@@ -12,7 +12,7 @@ only after passing correctness validation and security review.
 | [Architecture](https://a85tract.github.io/SciRecast/) | the three layers, why the boundaries fall where they do, how a case attaches |
 | [RecastEngine](https://a85tract.github.io/SciRecast/engine) | the spine, what is registered, and what the engine's own gates conclude |
 | [CESM Case](https://a85tract.github.io/SciRecast/cesm) | the first case: inventory, gate conclusions, and three pages of detail beneath it |
-| [Contributing](https://a85tract.github.io/SciRecast/contributing) | who changes what, where to send it, how to extend the engine |
+| [Contributing](https://a85tract.github.io/SciRecast/contribute) | who changes what, where to send it, how to extend the engine |
 
 This README is the thirty-second version and links onward rather than restating. Each section
 lives in exactly one page source (`index.md`, `engine.md`, `cesm.md`, …); the counted parts of

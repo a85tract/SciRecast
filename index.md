@@ -16,7 +16,7 @@ fall where they do. The engine and the first case each have their own:
 |---|---|
 | **[RecastEngine](engine)** | the engine itself: the spine, the plugin contract, what is registered, and what its own gates conclude |
 | **[CESM Case](cesm)** | the first case: component inventory, per-scheme progress, and every gate conclusion recorded so far |
-| **[Contributing](contributing)** | who changes what, where to send it, and how to extend the engine |
+| **[Contributing](contribute)** | who changes what, where to send it, and how to extend the engine |
 
 
 ## The Three Layers, Seen Through the CESM Case
@@ -73,7 +73,7 @@ it — maintained there, and nowhere twice.
 
 **Who changes what** follows from the layering: humans maintain the inner two,
 the agent produces the outermost, and nobody edits generated output by hand. The
-[Contributing](contributing) page says why, and where to send what.
+[Contributing](contribute) page says why, and where to send what.
 
 ---
 
