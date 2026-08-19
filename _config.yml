@@ -20,5 +20,4 @@ defaults:
 exclude:
   - RecastEngine/
   - cesm/
-  - .github/
   - README.md
