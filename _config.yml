@@ -1,7 +1,7 @@
 # GitHub Pages configuration.
 #
 # One file per tab: index.md is the architecture, engine.md the engine, cesm.md
-# the first case, contribute.md how to reach us. The tab bar is built from each
+# the first case, contribute.md how to reach us. The sidebar is built from each
 # page's own front matter -- so adding a tab means adding a file rather than
 # editing a list that can disagree with what exists.
 
@@ -12,6 +12,28 @@ title: SciRecast
 description: >-
   An agentic ecosystem for modernizing legacy scientific software. LLM agents do
   the porting; nothing ships until it has been checked against the original.
+
+# The theme is fetched at build time rather than vendored. jekyll-remote-theme
+# has to be listed explicitly: without it the build silently succeeds and
+# publishes pages with no layout at all.
+remote_theme: just-the-docs/just-the-docs
+plugins:
+  - jekyll-remote-theme
+
+# The theme's own palette is purple. This one is the palette the site already
+# used, which is GitHub's -- see _sass/color_schemes/.
+color_scheme: scirecast
+search_enabled: true
+
+# The theme renders ```mermaid fences itself, which is why no loader lives here.
+mermaid:
+  version: "11.4.1"
+
+aux_links:
+  Repository:
+    - https://github.com/a85tract/SciRecast
+  RecastEngine:
+    - https://github.com/a85tract/RecastEngine
 
 defaults:
   - scope: { path: "" }

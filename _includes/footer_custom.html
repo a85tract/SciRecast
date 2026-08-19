@@ -1,0 +1,15 @@
+<script>
+  // The old hand-written layout followed the reader's system theme, and the
+  // theme's scheme is a fixed build-time choice; this restores the behaviour.
+  // Guarded because a failure here should leave the light scheme standing
+  // rather than take the page down with it.
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof jtd === "undefined") return;
+    var dark = window.matchMedia("(prefers-color-scheme: dark)");
+    var apply = function (query) {
+      jtd.setTheme(query.matches ? "scirecast-dark" : "scirecast");
+    };
+    apply(dark);
+    dark.addEventListener("change", apply);
+  });
+</script>

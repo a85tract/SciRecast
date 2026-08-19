@@ -1,0 +1,6 @@
+---
+---
+// The active scheme also compiles into just-the-docs-default.css, but the
+// runtime switch resolves a stylesheet by scheme name -- so switching back to
+// light needs this file to exist under that name.
+{% include css/just-the-docs.scss.liquid color_scheme="scirecast" %}

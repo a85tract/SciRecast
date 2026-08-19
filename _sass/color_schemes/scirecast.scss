@@ -1,0 +1,15 @@
+// GitHub's palette, which is what a reader of a scientific repository sees all
+// day. Only the values that differ from the theme's light scheme are set; the
+// rest are inherited so a theme update does not fight a fork of its stylesheet.
+$link-color: #0969da;
+$btn-primary-color: #0969da;
+
+$body-text-color: #1f2328;
+$body-heading-color: #1f2328;
+$nav-child-link-color: #59636e;
+$search-result-preview-color: #59636e;
+
+$sidebar-color: #f6f8fa;
+$code-background-color: #f6f8fa;
+$table-background-color: #ffffff;
+$border-color: #d1d9e0;

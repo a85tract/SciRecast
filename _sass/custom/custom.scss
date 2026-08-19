@@ -1,0 +1,31 @@
+// One shape for both keyed tables: a labelled first column against the
+// alternatives it keys. Fixed layout means the longest cell no longer decides
+// the widths, and the min-width keeps them legible on a phone -- the theme
+// wraps every table in a scrolling box, so a wide one never pushes the page
+// sideways.
+.compare,
+.route {
+  table-layout: fixed;
+  min-width: 560px;
+}
+
+.compare td,
+.compare th,
+.route td,
+.route th {
+  padding: 9px 12px;
+}
+
+.compare th[scope="row"],
+.route td:first-child {
+  font-weight: 600;
+}
+
+.compare th[scope="row"] {
+  width: 20%;
+}
+
+.route td:first-child,
+.route th:first-child {
+  width: 34%;
+}
