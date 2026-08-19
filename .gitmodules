@@ -1,6 +1,21 @@
-[submodule "CESM-modernization-overview"]
-	path = CESM-modernization-overview
-	url = https://github.com/a85tract/CESM-modernization-overview.git
 [submodule "RecastEngine"]
 	path = RecastEngine
 	url = https://github.com/a85tract/RecastEngine.git
+[submodule "cesm/CC-Test"]
+	path = cesm/CC-Test
+	url = https://github.com/a85tract/CESM-CC-Test.git
+[submodule "cesm/JaxCAM6"]
+	path = cesm/JaxCAM6
+	url = https://github.com/a85tract/CESM-jax-kernels.git
+[submodule "cesm/NumbaCAM6"]
+	path = cesm/NumbaCAM6
+	url = https://github.com/a85tract/CESM-numba-kernels.git
+[submodule "cesm/PyCAM5"]
+	path = cesm/PyCAM5
+	url = https://github.com/a85tract/PyCAM5.git
+[submodule "cesm/PyCCPP"]
+	path = cesm/PyCCPP
+	url = https://github.com/a85tract/PyCCPP.git
+[submodule "cesm/freeCAM"]
+	path = cesm/freeCAM
+	url = https://github.com/a85tract/freeCAM.git

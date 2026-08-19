@@ -1,0 +1,55 @@
+name: dashboard
+
+# The counted half of the README is generated from the submodules. This keeps
+# it honest two ways: it refuses a pull request whose counts no longer match
+# the pinned revisions, and it refreshes weekly so a component advancing does
+# not silently age the numbers on the front page.
+#
+# Submodules are checked out one at a time, on purpose. Several component
+# repositories are private, and `submodules: true` aborts the whole checkout at
+# the first clone it cannot do -- the same failure mode that keeps Sec-Track
+# linked rather than submoduled. A component the runner cannot read is reported
+# by the generator as not counted, which is the honest result; the alternative
+# is a workflow that only ever runs for people holding every key.
+on:
+  pull_request:
+  schedule:
+    - cron: "17 6 * * 1"   # Mondays, off the hour to miss the rush
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check out whichever submodules this token can read
+        run: |
+          for path in $(git config -f .gitmodules --get-regexp '^submodule\..*\.path$' | awk '{print $2}'); do
+            if git submodule update --init --depth 1 -- "$path" 2>/dev/null; then
+              echo "  ok       $path"
+            else
+              echo "  private  $path (not counted)"
+              git submodule deinit -f -- "$path" >/dev/null 2>&1 || true
+            fi
+          done
+
+      - name: Verify the generated block matches the trees present
+        if: github.event_name == 'pull_request'
+        run: python tools/refresh_dashboard.py --check
+
+      - name: Refresh and commit when the counts have moved
+        if: github.event_name != 'pull_request'
+        run: |
+          python tools/refresh_dashboard.py
+          if git diff --quiet README.md; then
+            echo "counts unchanged"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Refresh the generated dashboard counts" README.md
+          git push

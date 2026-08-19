@@ -1,0 +1,10 @@
+# Working clones that live here for convenience but are not submodules.
+# SciRecast tracks exactly two submodules: RecastEngine and
+# CESM-modernization-overview. Everything below is checked out beside them so
+# the migration work has its sources at hand, and must never be committed.
+/recast-cesm/
+/CESM-language-translator/
+/CESM-Agent-Produced-Scripts/
+
+# macOS
+.DS_Store

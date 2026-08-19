@@ -3,103 +3,61 @@
 **An open-source, agentic ecosystem for modernizing legacy scientific software.**
 
 LLM agents do the labor-intensive porting work under human oversight; every artifact ships
-only after passing correctness validation and security review. This repository is the entry
-point, and it contains exactly two things:
+only after passing correctness validation and security review.
 
-| Submodule | What it is |
+## 📊 <https://a85tract.github.io/SciRecast/>
+
+| Tab | What is on it |
 |---|---|
-| [`RecastEngine`](https://github.com/a85tract/RecastEngine) | The modernization engine — the reusable, domain-independent part of SciRecast. |
-| [`CESM-modernization-overview`](https://github.com/a85tract/CESM-modernization-overview) | Our first case: modernizing CESM/CAM, the community Earth-system model. **Every Support- and Product-Layer component lives in there**, as its own submodule. |
+| [Architecture](https://a85tract.github.io/SciRecast/) | the three layers, why the boundaries fall where they do, how a case attaches |
+| [CESM · Status](https://a85tract.github.io/SciRecast/cesm-status) | component inventory and gate conclusions, generated from the submodules |
+| [CESM · CAM5 → Python](https://a85tract.github.io/SciRecast/cesm-cam5) | PyCAM5, freeCAM, PyCCPP |
+| [CESM · CAM6 → GPU](https://a85tract.github.io/SciRecast/cesm-cam6) | per-scheme progress, kernels, deployment, run archive, open items |
+| [CESM · Validation](https://a85tract.github.io/SciRecast/cesm-validation) | CC-Test and Sec-Track |
 
-Run `git submodule update --init` to populate both. Going deeper with
-`--recursive` will stop on the component repositories that are not public yet —
-follow the links in the case repository instead.
+This README is the thirty-second version and links onward rather than restating. Each section
+lives in exactly one page source (`index.md`, `cesm-status.md`, …); the counted half of the
+Status tab is generated from the submodules by
+[`tools/refresh_dashboard.py`](tools/refresh_dashboard.py), so a figure there is never older
+than the revision printed beside it.
 
-> **What is written where.** This file describes the ecosystem's *architecture*: what the
-> three layers are, why the boundaries fall where they do, and how a case attaches. It
-> carries **no status, no metrics, and no per-component detail** on purpose — those live in
-> the case repository and in each component's own README. A number maintained in two places
-> is a number that will eventually disagree with itself.
+<!-- generated:headline -->
+**6 of 6 components checked out here; no gate conclusions committed yet.** See the page for the inventory, the per-scheme progress, and what each figure was measured against.
+<!-- /generated:headline -->
 
----
+## What is here
 
-## The Three Layers, Seen Through the CESM Case
-
-SciRecast is organized into three layers. **Humans maintain the inner two** (the engine, and
-the validation & security infrastructure); **the agent produces the outermost one** — and only
-after the artifact passes the gates.
-
-```mermaid
-flowchart TB
-    subgraph Product["🟦 Product Layer — modernized software (CESM case)"]
-        PyCAM5["PyCAM5 · freeCAM · PyCCPP"]
-        JaxCAM6["JaxCAM6 · NumbaCAM6"]
-    end
-    subgraph Support["🟩 Support Layer — Validation &amp; Security"]
-        CCTest["CC-Test"]
-        SecTrack["Sec-Track"]
-    end
-    subgraph Core["🟥 Core Layer — RecastEngine"]
-        Engine["multi-LLM-agent, neuro-symbolic"]
-    end
-
-    Engine -- "translate · refactor · port to accelerators" --> Product
-    Engine -- "retrieve for correctness validation" --> CCTest
-    Engine -- "store security analyses" --> SecTrack
-    CCTest -- "gate" --> Product
-    SecTrack -- "gate" --> Product
+```bash
+git submodule update --init --recursive
 ```
 
-**🟥 Core Layer — [`RecastEngine`](https://github.com/a85tract/RecastEngine).** A multi-LLM-agent
-engine that combines the generative power of LLMs with the rigor of formal methods
-(neuro-symbolic). It translates languages, refactors architectures, ports code to
-accelerators, and gates every result against the original. The engine knows nothing about any
-particular model: domain knowledge attaches through its published plugin contract, which is
-what makes a second case possible without rebuilding anything. Its own
-[`docs/architecture.md`](https://github.com/a85tract/RecastEngine/blob/main/docs/architecture.md)
-carries the spine, the ten interfaces, and where the boundaries fall.
+| | |
+|---|---|
+| [`RecastEngine`](https://github.com/a85tract/RecastEngine) | the engine — domain-independent: contracts, recipes, gates |
+| `cesm/` | the first case's components, each its own submodule |
 
-**🟩 Support Layer — the trust foundation.** *CC-Test* is the CI/CD workflow covering both
-**C**orrectness and **C**yber testing; *Sec-Track* is the restricted-access record of N-day and
-responsibly disclosed vulnerabilities across the software, its supply chain, and its runtime.
-This is a separate layer because a gate the gated thing can influence is not a gate — what
-these two check, and how strictly, is deliberately not the engine's decision to make. The CESM
-case's instances of both, with their operational detail, are in the case repository.
+**CESM · Pipeline 1 (CAM5 → Python):** [`PyCAM5`](https://github.com/a85tract/PyCAM5) ·
+[`freeCAM`](https://github.com/a85tract/freeCAM) · [`PyCCPP`](https://github.com/a85tract/PyCCPP)
 
-**🟦 Product Layer — the modernized software itself.** Modernized artifacts are *outputs*, not
-components: what comes out when the engine, the domain knowledge, and the legacy source are
-put together. Humans do not hand-maintain this layer. For CESM, the products and their
-per-scheme status are tracked in the case repository.
+**CESM · Pipeline 2 (CAM6 → GPU):** [`JaxCAM6`](https://github.com/a85tract/CESM-jax-kernels) ·
+[`NumbaCAM6`](https://github.com/a85tract/CESM-numba-kernels)
 
-**Where the case lives.** Component repositories, pipeline structure, per-scheme progress, and
-validated-run evidence are all in
-**[`CESM-modernization-overview`](https://github.com/a85tract/CESM-modernization-overview)** —
-the only place any of it is maintained.
+**CESM · Shared:** [`CC-Test`](https://github.com/a85tract/CESM-CC-Test) ·
+[`Sec-Track`](https://github.com/a85tract/CESM-Sec-Track) (restricted — linked, never
+submoduled, because one unreadable submodule takes a recursive clone down with it)
 
-**Contribution model.** Human developers do **not** directly modify the Product Layer. When end
-users open issues, RecastEngine generates, tests, and merges the fixes. Humans contribute to the
-Core Layer (new formal methods and agentic designs) and to the Support Layer (benchmark suites,
-validation workflows, vulnerability reports).
+Components sit under `cesm/` rather than at the top level so that the case grouping survives
+in the tree: a second case is a second directory, not more names in a flat bag.
 
----
-
-## Why an umbrella repository at all
+## Why a repository and not only a site
 
 Because the submodule pointers are a record, not decoration. This repository at a given commit
-pins one exact revision of the engine and one of the case, so a result can be reproduced from a
+pins one revision of the engine and one of every component, so a result is reproducible from a
 single hash: `git submodule update --init --recursive` and you have the tree that produced it.
 The `Advance <component> to <sha>` commits in the history are that record over time, and the
 hooks in [`hooks/`](hooks/) (install with [`tools/install-hooks.sh`](tools/install-hooks.sh))
-are what keep the pointers from silently falling behind the work.
-
----
-
-## Contributing & Contact
-
-See [`CONTRIBUTING.md`](CONTRIBUTING.md). Bug reports and feature ideas go to the relevant
-component repository. **Security vulnerabilities:** please do *not* open a public issue — use a
-private GitHub security advisory or email **Yueqi Chen** (University of Colorado Boulder),
-<yueqi.chen@colorado.edu>.
+keep the pointers from silently falling behind the work. A site cannot hold any of that; it is
+the same facts, rendered for reading.
 
 ## License
 

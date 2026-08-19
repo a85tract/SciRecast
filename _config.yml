@@ -1,0 +1,29 @@
+# GitHub Pages configuration.
+#
+# The site is the dashboard, split into tabs: index.md is the architecture, and
+# cesm-*.md are the first case. Each section lives in exactly one file, the
+# README is the short way in and restates none of it, and the tab bar is built
+# from each page's own front matter -- so adding a tab means adding a file
+# rather than editing a list that can disagree with what exists.
+#
+# The counted blocks on the CESM Status tab, and the one-line headline in the
+# README, are written by tools/refresh_dashboard.py from the submodules. That is
+# what keeps a figure from outliving the work it describes.
+title: SciRecast
+description: >-
+  An agentic ecosystem for modernizing legacy scientific software. LLM agents do
+  the porting; nothing ships until it has been checked against the original.
+
+defaults:
+  - scope: { path: "" }
+    values: { layout: default }
+
+exclude:
+  - tools/
+  - hooks/
+  - RecastEngine/
+  - cesm/
+  - .github/
+  - .gitmodules
+  - README.md
+  - CONTRIBUTING.md
