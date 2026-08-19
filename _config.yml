@@ -1,15 +1,9 @@
 # GitHub Pages configuration.
 #
-# The site is the dashboard, split into tabs: index.md is the architecture, and
-# cesm-*.md are the first case. Each section lives in exactly one file, the
-# README is the short way in and restates none of it, and the tab bar is built
-# from each page's own front matter -- so adding a tab means adding a file
-# rather than editing a list that can disagree with what exists.
-#
-# The counted blocks on the CESM Status tab, and the one-line headline in the
-# README, are written by tools/refresh_dashboard.py, which clones each component
-# on demand rather than tracking it here. That is what keeps a figure from
-# outliving the work it describes without keeping a pointer to every component.
+# One file per tab: index.md is the architecture, engine.md the engine, cesm.md
+# the first case, contribute.md how to reach us. The tab bar is built from each
+# page's own front matter -- so adding a tab means adding a file rather than
+# editing a list that can disagree with what exists.
 
 # RecastEngine/ and cesm/ are not in this repository; they are excluded because a
 # developer's working clones often sit there, and Jekyll would otherwise try to
@@ -24,9 +18,7 @@ defaults:
     values: { layout: default }
 
 exclude:
-  - tools/
   - RecastEngine/
   - cesm/
   - .github/
   - README.md
-  - CONTRIBUTING.md

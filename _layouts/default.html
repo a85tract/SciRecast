@@ -57,6 +57,23 @@
     code { background: var(--soft); padding: 2px 5px; border-radius: 4px; }
     pre { background: var(--soft); padding: 14px; border-radius: 6px; overflow-x: auto; }
     pre code { background: none; padding: 0; }
+    /* Mermaid gives the diagram its own max-width, so one narrower than the text
+       column sits against the left edge with a ragged gap beside it. Centre it,
+       and let it shrink rather than push the page sideways on a phone. */
+    .mermaid { margin: 1.6em 0; text-align: center; }
+    .mermaid svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+    /* One shape for both keyed tables: a labelled first column against the
+       alternatives it keys. Fixed layout means the longest cell no longer
+       decides the widths, and the min-width keeps them legible on a phone,
+       where they scroll inside their own box. Only the label width differs --
+       the pipelines are compared, the routes are questions. */
+    .compare, .route { table-layout: fixed; min-width: 560px; }
+    .compare td, .compare th, .route td, .route th { padding: 9px 12px; }
+    .compare th[scope="row"], .route td:first-child {
+      font-weight: 600; background: var(--soft);
+    }
+    .compare th[scope="row"] { width: 20%; }
+    .route td:first-child, .route th:first-child { width: 34%; }
     /* Wide status tables must scroll inside themselves rather than pushing the page sideways. */
     .table-scroll { overflow-x: auto; margin: 1em 0; }
     table { border-collapse: collapse; width: 100%; font-size: 14px; }
@@ -96,11 +113,7 @@
     {{ content }}
   </main>
   <footer class="wrap">
-    Generated blocks come from
-    <a href="https://github.com/a85tract/CESM-modernization-overview/blob/main/tools/refresh_dashboard.py">tools/refresh_dashboard.py</a>;
-    everything else is human assessment and says so.
-    <a href="https://github.com/a85tract/CESM-modernization-overview">Repository</a> ·
-    <a href="https://github.com/a85tract/SciRecast">SciRecast</a> ·
+    <a href="https://github.com/a85tract/SciRecast">Repository</a> ·
     <a href="https://github.com/a85tract/RecastEngine">RecastEngine</a>
   </footer>
   {%- if content contains "language-mermaid" %}

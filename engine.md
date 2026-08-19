@@ -7,6 +7,10 @@ nav_order: 2
 
 **The modernization engine — the reusable, domain-independent part of SciRecast.**
 
+The engine is its own repository — [`a85tract/RecastEngine`](https://github.com/a85tract/RecastEngine).
+This page says what it is and what its own gates conclude; the README there says how to run
+it.
+
 The engine produces nothing on its own. A product is what comes out when the
 engine is combined with the domain knowledge a particular effort needs and the
 source being modernized; see [Architecture](.) for why that separation is the
@@ -29,7 +33,6 @@ Every capability arrives through an entry point, including the engine's own —
 there is no privileged built-in path, which is what makes a domain package like
 `recast-cesm` a first-class extension rather than a patch.
 
-<!-- generated:plugins -->
 | Kind | Registered |
 |---|---|
 | frontend | `fortran` |
@@ -41,7 +44,6 @@ there is no privileged built-in path, which is what makes a domain package like
 | recipe | `audit`, `port`, `refactor`, `translate` |
 
 *Read from `RecastEngine`'s `pyproject.toml` at `6333399`. A domain package adds to this list by declaring the same entry-point groups -- `recast-cesm` supplies the `cesm` frontend, the `translate.cam` transform and the `translate-cam` recipe that way, with no change to the engine.*
-<!-- /generated:plugins -->
 
 ## What the gates concluded, on the engine's own example
 
@@ -52,7 +54,6 @@ rewrites, write the evidence. The verdicts below are read from the summary the
 example commits, so they are what a clean run concludes rather than what a
 README claims.
 
-<!-- generated:engine-verdicts -->
 | Unit | Verifier | Confidence | Metrics |
 |---|---|---|---|
 | `fortran:toy_physics` | `static.rwset` | **sampled** | blocks_checked=4 |
@@ -60,15 +61,4 @@ README claims.
 | `fortran:toy_physics` | `symbolic.notary` | **symbolic** | rewrites=0 |
 
 *Read from the summaries committed in `RecastEngine` at `6333399`. The engine's CI regenerates them on a clean machine and fails on any difference, so a verdict here is what a fresh run concludes rather than what was true once.*
-<!-- /generated:engine-verdicts -->
 
-## Reading further
-
-| | |
-|---|---|
-| [`README`](https://github.com/a85tract/RecastEngine#readme) | quick start, and a run you can reproduce |
-| [`docs/architecture.md`](https://github.com/a85tract/RecastEngine/blob/main/docs/architecture.md) | the spine, the ten interfaces, where the boundaries fall |
-| [`docs/splitting-the-translator.md`](https://github.com/a85tract/RecastEngine/blob/main/docs/splitting-the-translator.md) | how a 2,883-line translator became reusable parts, and what held it honest |
-| [`docs/writing-a-plugin.md`](https://github.com/a85tract/RecastEngine/blob/main/docs/writing-a-plugin.md) | how to extend it |
-| [`docs/roadmap.md`](https://github.com/a85tract/RecastEngine/blob/main/docs/roadmap.md) | phases P0–P6 |
-| [`conformance/`](https://github.com/a85tract/RecastEngine/tree/main/conformance) | what a plugin must satisfy |

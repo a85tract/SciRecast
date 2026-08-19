@@ -1,7 +1,6 @@
-# Working clones that live here for convenience. This repository is the
-# dashboard and tracks none of them: the components are cloned on demand by
-# tools/refresh_dashboard.py, counted, and discarded, so anything checked out
-# beside it is one developer's convenience and must never be committed.
+# Working clones that live here for convenience. This repository is the site and
+# tracks none of them -- each component is its own repository, linked from the
+# pages, so anything checked out beside them must never be committed.
 /recast-cesm/
 /CESM-language-translator/
 /CESM-Agent-Produced-Scripts/

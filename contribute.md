@@ -5,29 +5,14 @@ nav_order: 4
 
 # Contributing
 
-## Who changes what
-
-Human developers do **not** directly modify the Product Layer. When end users
-open issues, RecastEngine generates, tests, and merges the fixes. Humans
-contribute to the **Core Layer** — new formal methods, agentic designs, plugin
-contracts — and to the **Support Layer** — benchmark suites, validation
-workflows, vulnerability reports.
-
-That division is not deference to the machine; it is what keeps the gates
-meaningful. A human editing generated output by hand produces an artifact whose
-provenance no longer matches its evidence, and the next regeneration silently
-undoes the edit. If generated code is wrong, the rule that generated it is
-wrong — fix that, in the engine, where the fix applies to every artifact rather
-than to one.
-
 ## Where to send what
 
-| | |
+| What you have | Where it goes |
 |---|---|
-| A bug or a feature idea in a component | that component's own repository |
+| A bug or a feature idea in a component | that component's own repository — [`PyCAM5`](https://github.com/a85tract/PyCAM5), [`freeCAM`](https://github.com/a85tract/freeCAM), [`JaxCAM6`](https://github.com/a85tract/CESM-jax-kernels), [`NumbaCAM6`](https://github.com/a85tract/CESM-numba-kernels), [`CC-Test`](https://github.com/a85tract/CESM-CC-Test), [`Sec-Track`](https://github.com/a85tract/CESM-Sec-Track) |
 | A translation that is wrong, or a rule that should exist | [RecastEngine issues](https://github.com/a85tract/RecastEngine/issues) |
-| A gate that passed something it should not have | RecastEngine issues — a gate that can be fooled is the more serious bug |
-| **A security vulnerability** | **never a public issue** — a private GitHub security advisory, or email below |
+| **A security vulnerability** | **never a public issue** — a private GitHub security advisory, or the address below |
+{: .route}
 
 ## Extending the engine
 
@@ -47,10 +32,6 @@ check, not an aspiration.
 
 ## Contact
 
-Full guidelines: [`CONTRIBUTING.md`](https://github.com/a85tract/SciRecast/blob/main/CONTRIBUTING.md).
-
-**Security vulnerabilities:** please do *not* open a public issue — use a private
-GitHub security advisory or email **Yueqi Chen** (University of Colorado
-Boulder), <yueqi.chen@colorado.edu>.
-
-**Collaboration and licensing:** the same address.
+**Security vulnerabilities, collaboration, and licensing** — **Yueqi Chen**, University of
+Colorado Boulder, <yueqi.chen@colorado.edu>. For a vulnerability, please do *not* open a
+public issue: use a private GitHub security advisory, or this address.

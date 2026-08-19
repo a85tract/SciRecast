@@ -3,111 +3,105 @@ title: CESM Case
 nav_order: 3
 ---
 
-# CESM/CAM Modernization
+# CESM Modernization
 
-SciRecast's first case: rewriting CESM/CAM's physics, with the native Fortran
-kept as the reference and every artifact gated against it. Two pipelines, one
-shared validation layer.
+**SciRecast's first case.**
 
-| | Read on |
-|---|---|
-| PyCAM5, freeCAM, PyCCPP — the CAM5 → Python pipeline | [CAM5 → Python](cesm-cam5) |
-| JaxCAM6, NumbaCAM6 — the CAM6 → GPU pipeline, per-scheme progress | [CAM6 → GPU](cesm-cam6) |
-| CC-Test and Sec-Track — the gates both pipelines pass | [Validation & Security](cesm-validation) |
+Two pipelines, one shared validation layer. Every component below is its own repository.
 
-Two halves across these pages, and the difference matters when you read a
-number. The **inventory** and **gate conclusions** below are generated from the
-component repositories themselves by
-[`tools/refresh_dashboard.py`](https://github.com/a85tract/SciRecast/blob/main/tools/refresh_dashboard.py),
-each figure beside the revision it was counted at. Everything on the three pages
-linked above is **human assessment** and carries its own date.
+## Two modernization pipelines
 
-## Component Inventory
+<!-- HTML rather than a markdown table: the shared row has to span both
+     pipeline columns, and kramdown's tables have no colspan. -->
+<table class="compare">
+  <thead>
+    <tr><th></th><th>Pipeline 1</th><th>Pipeline 2</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Target model</th>
+      <td><strong>CAM5</strong></td>
+      <td><strong>CAM6</strong></td>
+    </tr>
+    <tr>
+      <th scope="row">Approach</th>
+      <td>Rewrite to Python + <strong>decoupling</strong> (modularize physics; Codon-compiled)</td>
+      <td>Rewrite to <strong>Python/JAX + Numba, GPU-accelerated</strong></td>
+    </tr>
+    <tr>
+      <th scope="row">Primary goal</th>
+      <td>Modular, reusable Python CAM5 that stays <strong>bit-for-bit</strong> with native Fortran</td>
+      <td>GPU-accelerated physics kernels validated against native Fortran</td>
+    </tr>
+    <tr>
+      <th scope="row">Core artifacts</th>
+      <td><a href="#pycam5"><code>PyCAM5</code></a>,
+          <a href="#freecam"><code>freeCAM</code></a></td>
+      <td><a href="#jaxcam6"><code>JaxCAM6</code></a>,
+          <a href="#numbacam6"><code>NumbaCAM6</code></a></td>
+    </tr>
+    <tr>
+      <th scope="row">Status metric</th>
+      <td>Runtime selector coverage + long-run BFB evidence</td>
+      <td>Per-scheme progress against native CESM output (8 schemes)</td>
+    </tr>
+    <tr>
+      <th scope="row">Validation &amp; Security</th>
+      <td colspan="2"><a href="#cc-test"><code>CC-Test</code></a>,
+          <a href="#sec-track"><code>Sec-Track</code></a> (restricted)</td>
+    </tr>
+  </tbody>
+</table>
 
-Counts and revisions below are taken from the component repositories by
-[`tools/refresh_dashboard.py`](tools/refresh_dashboard.py), not typed in — it clones each one
-at its default branch, counts it, and discards the clone. Each number sits beside the revision
-it was counted at, so it can be re-derived rather than trusted.
+## Pipeline 1 — CAM5 → Python + decoupling
 
-<!-- generated:inventory -->
-| Component | Revision counted | Last commit | Counted |
-|---|---|---|---|
-| `PyCAM5` | `e8d6899` | 2026-08-10 | 831 runtime selectors, 55 Codon modules, 2,475 exported routines |
-| `freeCAM` | `5b18907` | 2026-08-18 | 101 Python files |
-| `PyCCPP` | `d57889a` | 2026-04-23 | 1,079 Fortran files |
-| `JaxCAM6` | `1b7c82b` | 2026-07-06 | 8 schemes, 12,444 kernel lines, 22 test files |
-| `NumbaCAM6` | `c86638f` | 2026-07-06 | 4 schemes, 19,993 kernel lines, 62 test files |
-| `CC-Test` | `49af867` | 2026-08-13 | 3 tools |
+Rewrites the CAM5 physics into Python while **decoupling** the tightly-woven Fortran into
+modular, reusable components. The native Fortran path remains the reference; the Python
+(Codon-compiled) path is selected at runtime and must stay bit-for-bit (BFB) with it.
 
-*Counted by `tools/refresh_dashboard.py` at 2026-08-19 15:21 UTC, from a fresh clone of each component's default branch. Re-run it to bring the numbers to the current tips; every number here is reproducible from the revision beside it.*
-<!-- /generated:inventory -->
+### [PyCAM5](https://github.com/a85tract/PyCAM5)
+Python (Codon-compiled) port of CAM5 inside the isotope-enabled iCESM1.3/iHESP CAM
+component. Runtime `*_IMPL` selectors pick native Fortran vs Codon per entry point; the
+goal is BFB output against a pristine native baseline.
 
-### Gate conclusions
+### [freeCAM](https://github.com/a85tract/freeCAM)
+Python-owned CAM runtime: Python owns the model control path, clock, MPI-aware state,
+coupling boundaries, and phase ordering, while the original Fortran supplies the numerics
+through generated `bind(C)` adapters. Where PyCAM5 replaces the Fortran with Codon, freeCAM
+keeps the original machine code and takes the **control path** instead — the decoupling goal
+approached from the other end.
 
-What has actually been compared against the original, and at what confidence.
-These rows come from the `verification.json` files the components commit — not
-progress estimates but recorded verdicts, each naming the oracle it was measured
-against.
+## Pipeline 2 — CAM6 → Python/JAX + GPU
 
-<!-- generated:gates -->
-*No component has committed gate conclusions yet. A component wires this up by running the engine's gates and committing the `verification.json` they write; see [RecastEngine's examples](https://github.com/a85tract/RecastEngine/tree/main/examples).*
-<!-- /generated:gates -->
+Ports the CAM6 physics parameterizations from Fortran to Python, accelerating the
+computational kernels on NVIDIA GPUs via JAX and Numba (`@njit` / `@cuda.jit`), validated
+scheme-by-scheme against native CESM output.
 
-**Judgements are not generated.** The per-scheme progress table, the bug tallies, the run
-archive, and the work items further down are human assessments — no scan produces "CLUBB
-45%" or "rrtthl is likely the root cause". They are maintained by hand and carry their own
-date: **as of 2026-06-29** (layout last updated 2026-07-17). Treat that date as part of the
-claim; a judgement older than the work it describes is a lead, not a result, and each
-component repository is authoritative for its own state.
+### [JaxCAM6](https://github.com/a85tract/CESM-jax-kernels)
+All JAX kernel implementations, organized by physics scheme: ZM, MG, Kessler, CLUBB,
+Radiation, Shallow, HS94 and TJ2016.
 
+### [NumbaCAM6](https://github.com/a85tract/CESM-numba-kernels)
+All Numba (`@njit` + `@cuda.jit`) kernel implementations: ZM, MG, CLUBB (+Option C) and
+Kessler, plus the Option C C/PTX launcher.
 
+## Validation & security (shared by both pipelines)
 
-## Two Modernization Pipelines
+### [CC-Test](https://github.com/a85tract/CESM-CC-Test)
+The CESM case's instance of SciRecast's Support Layer, built out on the Cyber side today:
+a reusable local + CI DevSecOps gate for the modernization repos. It runs the same checks
+before a `git push` that the cloud CI runs on every PR — secret scan, SBOM+CVE+VEX, AI code
+audit, sanitizer builds — reusing each target repo's own config so local and cloud never
+drift.
 
-| | **Pipeline 1** | **Pipeline 2** |
-|---|---|---|
-| Target model | **CAM5** | **CAM6** |
-| Approach | Rewrite to Python + **decoupling** (modularize physics; Codon-compiled) | Rewrite to **Python/JAX + Numba, GPU-accelerated** |
-| Primary goal | Modular, reusable Python CAM5 that stays **bit-for-bit** with native Fortran | GPU-accelerated physics kernels validated against native Fortran |
-| Core artifacts | `PyCAM5`, `freeCAM`, `PyCCPP` | `JaxCAM6`, `NumbaCAM6` (+ `pyphys-bridge`) |
-| Status metric | Runtime selector coverage + long-run BFB evidence | Per-scheme progress dashboard (8 schemes) |
+### [Sec-Track](https://github.com/a85tract/CESM-Sec-Track)
+The CESM case's vulnerability record: N-day and responsibly disclosed 0-day findings spanning
+the modernized software, its supply-chain dependencies, and the runtime environment. Access
+is granted per person, both to reduce the risk of malicious exploitation and because a
+figure nobody outside can re-derive would be a claim rather than evidence — so it is listed
+here by name and never as a number.
 
-Shared across both pipelines: **Validation & Security** infrastructure (`CESM-CC-Test`,
-`CESM-Sec-Track`). Each component is its own repository; clone whichever ones you need.
-
-`CESM-Sec-Track` is the one nothing here counts. It holds unpatched vulnerabilities, so
-access is granted per person and no public run can re-derive a number from it. See
-[Sec-Track](#sec-track--cesm-sec-track-restricted).
-
----
-
-## Where each piece lives
-
-Every name below is a repository of its own. This page counts the first three groups and
-clones them on demand; the rest are listed so the map is complete, not because anything here
-reads them.
-
-```
-  # ── Pipeline 1: CAM5 → Python + decoupling ──
-  PyCAM5            -> PyCAM5                     Python/Codon CAM5 port (BFB validated)
-  freeCAM           -> freeCAM                    Python-owned CAM control path + decomposable devices
-  PyCCPP            -> PyCCPP                     Python Common Community Physics Package
-
-  # ── Pipeline 2: CAM6 → Python/JAX + GPU ──
-  JaxCAM6           -> CESM-jax-kernels           JAX kernel implementations
-  NumbaCAM6         -> CESM-numba-kernels         Numba CPU+GPU kernels
-
-  # ── Shared: validation & security ──
-  CC-Test           -> CESM-CC-Test               CC-Test: CI/CD validation workflow (Cyber now, Correctness later)
-
-  # ── Related, and not counted here ──
-                       CESM-Sec-Track              Sec-Track: N-day/0-day vuln repo (restricted access)
-                       CESM-pyphys-bridge          Fortran-Python bridge + CESM adapters
-                       CESM-Agent-Produced-Scripts Agent-produced modernization scripts
-
-  # ── Pipeline 2 analysis tools (local /glade dirs on Derecho, NOT linked repos) ──
-  cpg/              -> /glade/u/home/dai/cpg              Code Property Graph analysis
-  ast-comparison/   -> /glade/u/home/dai/ast_comparison  Fortran AST comparison tool
-  gpu-performance/  -> /glade/u/home/dai/GPU_PERFORMANCE A100 benchmarks + MPS config
-  bug-audit/        -> /glade/u/home/dai/safe-ose        Bug case files and audit reports
-```
+### Analysis tools
+Code Property Graph analysis, Fortran AST comparison, A100 benchmarking, and bug case
+files, kept under `/glade/u/home/dai/` on Derecho. They are working directories rather
+than repositories, so nothing here links or counts them.
