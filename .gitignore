@@ -2,8 +2,8 @@
 # tracks none of them -- each component is its own repository, linked from the
 # pages, so anything checked out beside them must never be committed.
 /recast-cesm/
-/CESM-language-translator/
-/CESM-Agent-Produced-Scripts/
+/cesm/CESM-language-translator/
+/cesm/CESM-Agent-Produced-Scripts/
 /RecastEngine/
 /cesm/CC-Test/
 /cesm/JaxCAM6/
