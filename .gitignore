@@ -7,6 +7,3 @@
 
 # macOS
 .DS_Store
-# A top-level PyCAM5 is a scratch clone; committing it would ship an embedded
-# repository nobody can fetch.
-/PyCAM5/
