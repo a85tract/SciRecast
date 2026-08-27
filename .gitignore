@@ -2,16 +2,8 @@
 # tracks none of them -- each component is its own repository, linked from the
 # pages, so anything checked out beside them must never be committed.
 /recast-cesm/
-/cesm/CESM-language-translator/
-/cesm/CESM-Agent-Produced-Scripts/
-/cesm/Sec-Track/
 /RecastEngine/
-/cesm/CC-Test/
-/cesm/JaxCAM6/
-/cesm/NumbaCAM6/
-/cesm/PyCAM5/
-/cesm/PyCCPP/
-/cesm/freeCAM/
+/cesm/
 
 # macOS
 .DS_Store
