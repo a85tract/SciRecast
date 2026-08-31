@@ -3,7 +3,12 @@
 # pages, so anything checked out beside them must never be committed.
 /recast-cesm/
 /RecastEngine/
+/RecastEngine-clm/
 /cesm/
+/e3sm/
+/ilamb_agent/
+/ilamb_agent-taint/
+/recast-clm-ml/
 
 # macOS
 .DS_Store
