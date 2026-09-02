@@ -132,31 +132,45 @@
         <h2>CESM Case</h2>
         <p class="ch-lede">
           The first model the engine is used on: the Community Earth System
-          Model. Two atmosphere pipelines and a shared validation layer. Every
-          component is its own repository.
+          Model. Five products so far, each in its own repository.
         </p>
       </div>
 
       <div class="prose">
-        <div class="table-wrap">
-          <table class="compare">
-            <thead>
-              <tr><th></th><th>Pipeline 1</th><th>Pipeline 2</th></tr>
-            </thead>
-            <tbody>
-              <tr><th scope="row">Model</th><td><strong>CAM5</strong></td><td><strong>CAM6</strong></td></tr>
-              <tr><th scope="row">Target</th><td>Rewrite to Python and decouple the physics into modules</td><td>Rewrite to JAX/Numba/CUDA, GPU-accelerated kernels</td></tr>
-              <tr><th scope="row">Repositories</th><td><a href="https://github.com/a85tract/PyCAM5">PyCAM5</a>, <a href="https://github.com/a85tract/freeCAM">freeCAM</a></td><td>JaxCAM6, NumbaCAM6 <span class="muted">(private)</span></td></tr>
-              <tr><th scope="row">Validation and security</th><td colspan="2"><a href="https://github.com/a85tract/CESM-CC-Test">CC-Test</a>, the gate for both <strong>C</strong>orrectness and <strong>C</strong>yber testing; <br> Sec-Track <span class="muted">(restricted)</span>, the repo of identified vulnerabilities. </td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p>
-          <strong>A reproduced case.</strong> The multilayer canopy of the
-          Community Land Model (CLM-ml v2, 76 Fortran modules) was taken to
-          NumPy and JAX under the engine and a small domain extension,
-          reproducing <a href="https://arxiv.org/abs/2606.07681">arXiv:2606.07681</a>.
-        </p>
+        <ul>
+          <li>
+            <strong><a href="https://github.com/a85tract/PyCAM5">PyCAM5</a>.</strong>
+            CAM5 physics moved into Python routine by routine, each routine
+            selectable at runtime and held bit-for-bit against the native
+            Fortran in production-length runs on Derecho.
+          </li>
+          <li>
+            <strong><a href="https://github.com/a85tract/freeCAM">freeCAM</a>.</strong>
+            The CAM atmosphere of iCESM1.3.1 under a Python control layer.
+            Python owns the workflow, clock and coupling; the original Fortran
+            stays the numerical source of truth; physical processes can be
+            reordered, enabled or disabled while the model runs.
+          </li>
+          <li>
+            <strong><a href="https://github.com/a85tract/CESM-CC-Test">CC-Test</a>.</strong>
+            The gate every product passes before a push: correctness against
+            the original model, and cyber checks (secret scan, SBOM and CVE,
+            AI code audit, sanitizer builds).
+          </li>
+          <li>
+            <strong>Sec-Track</strong> <span class="muted">(restricted)</span><strong>.</strong>
+            The record of vulnerabilities found in CESM along the way, with
+            the patches that close them.
+          </li>
+          <li>
+            <strong><a href="https://github.com/a85tract/clm-ml-jax-reproduction">clm-ml-jax-reproduction</a>.</strong>
+            The multilayer canopy of the Community Land Model (CLM-ml v2, 76
+            Fortran modules) taken to NumPy and JAX under the engine and a
+            small domain extension, reproducing
+            <a href="https://arxiv.org/abs/2606.07681">arXiv:2606.07681</a>
+            with a different instrument than the authors' own translation.
+          </li>
+        </ul>
       </div>
 
     </section>
