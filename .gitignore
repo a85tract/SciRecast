@@ -1,8 +1,6 @@
 # Working clones that live here for convenience. This repository is the site and
 # tracks none of them -- each component is its own repository, linked from the
 # page, so anything checked out beside these files must never be committed.
-/cesm/
-/e3sm/
 
 # macOS
 .DS_Store
