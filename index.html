@@ -63,9 +63,6 @@
     <a href="#engine"><span class="n">1</span>RecastEngine</a>
     <a href="#cesm"><span class="n">2</span>CESM Case</a>
     <a href="#contribute"><span class="n">3</span>Contributing</a>
-    <a class="sub" href="#contribute-where">Where to send what</a>
-    <a class="sub" href="#contribute-extend">Extending the engine</a>
-    <a class="sub" href="#contribute-contact">Contact</a>
   </nav>
   <main>
     <details class="toc-mobile">
@@ -145,10 +142,9 @@
     <section class="chapter" id="contribute">
       <div class="ch-head">
         <h2>Contributing</h2>
-        <p class="ch-lede">Where to send what, and how to extend the engine.</p>
+        <p class="ch-lede">Where to send what.</p>
       </div>
 
-      <h3 id="contribute-where"><span class="sec-no">3.1</span>Where to send what</h3>
       <div class="prose">
         <div class="table-wrap">
           <table class="route">
@@ -157,34 +153,11 @@
               <tr><td>A translation that is wrong, or a rule that should exist</td><td><a href="https://github.com/a85tract/RecastEngine/issues">RecastEngine issues</a>, with the console output of the run</td></tr>
               <tr><td>A bug or an idea in a component</td><td>that component's own repository: <a href="https://github.com/a85tract/PyCAM5">PyCAM5</a>, <a href="https://github.com/a85tract/freeCAM">freeCAM</a>, <a href="https://github.com/a85tract/CESM-CC-Test">CC-Test</a></td></tr>
               <tr><td><strong>A security vulnerability</strong></td><td><strong>never a public issue</strong>: a private GitHub security advisory, or the address below</td></tr>
+              <tr><td>Collaboration, licensing, or a vulnerability report</td><td>Yueqi Chen, University of Colorado Boulder, <a href="mailto:yueqi.chen@colorado.edu">yueqi.chen@colorado.edu</a></td></tr>
             </tbody>
           </table>
         </div>
       </div>
-
-      <h3 id="contribute-extend"><span class="sec-no">3.2</span>Extending the engine</h3>
-      <div class="prose">
-        <p>
-          Implement one of the ten interfaces in
-          <a href="https://github.com/a85tract/RecastEngine/tree/main/src/recast/plugins"><code>src/recast/plugins/</code></a>
-          and register an entry point;
-          <a href="https://github.com/a85tract/RecastEngine/blob/main/docs/writing-a-plugin.md">writing-a-plugin.md</a>
-          walks through it. Knowledge of your model or your cluster belongs in a
-          plugin, not in the engine: the engine passing its tests with every
-          domain package uninstalled is a standing check.
-        </p>
-      </div>
-
-      <h3 id="contribute-contact"><span class="sec-no">3.3</span>Contact</h3>
-      <div class="prose">
-        <p>
-          <strong>Security vulnerabilities, collaboration, and licensing:</strong>
-          Yueqi Chen, University of Colorado Boulder,
-          <a href="mailto:yueqi.chen@colorado.edu">yueqi.chen@colorado.edu</a>.
-          For a vulnerability, please do not open a public issue.
-        </p>
-      </div>
-
     </section>
   </main>
 </div>
