@@ -1,15 +1,17 @@
 # SciRecast
 
-Source for **<https://a85tract.github.io/SciRecast/>** — the site for SciRecast, an agentic
-ecosystem for modernizing legacy scientific software.
+The public site of [SciRecast](https://a85tract.github.io/SciRecast/): the
+engine, the first case, and how to contribute.
 
-Nothing else lives here. Every component is its own repository, linked from the site.
+One page, no build step. `index.html` is the content, `assets/css/site.css`
+the design system, `assets/js/site.js` the theme switch, reading progress
+and scroll spy. `.nojekyll` tells GitHub Pages to serve the files as they
+are. To preview, open `index.html` in a browser, or:
 
-Four pages (`index.md`, `engine.md`, `cesm.md`, `contribute.md`), one layout, published by
-GitHub Pages.
+```bash
+python3 -m http.server 8000
+```
 
-## License
-
-Apache License 2.0 — see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE). Legacy code retained
-inside modernized software keeps its original license, documented in each component's
-`NOTICE`.
+Every component the page names is its own repository, linked from the page;
+this repository tracks none of them. Working clones that sit beside these
+files for convenience are ignored by `.gitignore`.

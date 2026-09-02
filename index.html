@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SciRecast</title>
+<meta name="description" content="An agentic ecosystem for modernizing legacy scientific software. LLM agents do the porting; nothing ships until it has been checked against the original.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+<script>
+  // Theme before first paint: a stored choice wins, otherwise the system's.
+  try {
+    var t = localStorage.getItem("scirecast-theme");
+    if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#top">
+    <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><g stroke="currentColor" stroke-width="1.4" fill="none"><path d="M3 7h16M3 15h16M7 4v14M15 4v14"/><path d="M3 4v3M19 4v3M3 15v3M19 15v3" stroke-dasharray="2 2"/></g><circle cx="11" cy="11" r="2.1" fill="var(--cx)" stroke="none"/></svg>
+    SciRecast
+  </a>
+  <nav class="topnav" aria-label="chapters">
+    <a href="#engine">RecastEngine</a>
+    <a href="#cesm">CESM Case</a>
+    <a href="#contribute">Contributing</a>
+  </nav>
+  <span class="spacer"></span>
+  <div class="aux">
+    <a href="https://github.com/a85tract/SciRecast">Repository ↗</a>
+    <a href="https://github.com/a85tract/RecastEngine">RecastEngine ↗</a>
+  </div>
+  <div class="theme-switch" role="group" aria-label="Theme">
+    <button type="button" data-theme="system" aria-pressed="true" title="Follow the system">Auto</button>
+    <button type="button" data-theme="light" aria-pressed="false">Light</button>
+    <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+  </div>
+  <div class="progress-track"><div class="progress-bar"></div></div>
+</header>
+
+<div class="hero" id="top">
+  <div class="hero-inner">
+    <div class="eyebrow">An open-source, agentic ecosystem</div>
+    <h1>Modernizing legacy scientific software, <span class="accent">held to the original</span></h1>
+    <p class="lede">
+      LLM agents do the labor-intensive porting work under human oversight.
+      Nothing ships until it has been checked against the compiled original:
+      the translation runs, the Fortran runs, and every output has to agree.
+    </p>
+    <div class="promise">
+      <span><span class="mono">bit-exact</span> is the bar. Not a tolerance chosen to pass, but the compiled Fortran's own bits, on its own inputs.</span>
+    </div>
+    <div class="cta-row">
+      <a class="btn primary" href="#engine">Start with the engine ↓</a>
+      <span class="muted small">Twenty minutes from an empty machine to a verified translation of your own module.</span>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="rail" aria-label="contents">
+    <p class="rail-title">Contents</p>
+    <a href="#engine"><span class="n">1</span>RecastEngine</a>
+    <a class="sub" href="#engine-install">Install and run</a>
+    <a class="sub" href="#engine-output">What comes out</a>
+    <a class="sub" href="#engine-docs">Read next</a>
+    <a href="#cesm"><span class="n">2</span>CESM Case</a>
+    <a class="sub" href="#cesm-pipelines">Two pipelines</a>
+    <a class="sub" href="#cesm-clm">The canopy model</a>
+    <a class="sub" href="#cesm-trust">Validation and security</a>
+    <a href="#contribute"><span class="n">3</span>Contributing</a>
+    <a class="sub" href="#contribute-where">Where to send what</a>
+    <a class="sub" href="#contribute-extend">Extending the engine</a>
+    <a class="sub" href="#contribute-contact">Contact</a>
+  </nav>
+  <main>
+    <details class="toc-mobile">
+      <summary>Contents</summary>
+      <nav>
+        <a href="#engine"><span class="n">1</span>RecastEngine</a>
+        <a href="#cesm"><span class="n">2</span>CESM Case</a>
+        <a href="#contribute"><span class="n">3</span>Contributing</a>
+      </nav>
+    </details>
+
+    <!-- ============================ 1 ============================ -->
+    <section class="chapter" id="engine">
+      <div class="ch-head">
+        <div class="ch-no">Chapter 1</div>
+        <h2>RecastEngine</h2>
+        <p class="ch-lede">
+          The engine is the reusable part of SciRecast: it reads your Fortran,
+          writes Python, compiles the untouched Fortran as the reference, and
+          refuses to call the translation correct unless every output agrees
+          bit for bit. It knows nothing about any particular model; domain
+          knowledge attaches through a plugin contract.
+        </p>
+      </div>
+
+      <div class="prose">
+        <div class="formula center">
+          discover <span class="dim">→</span> analyze <span class="dim">→</span> transform <span class="dim">→</span> verify <span class="dim">→</span> record
+        </div>
+        <p>
+          One spine, walked by every workload. <code>translate</code> takes
+          Fortran to NumPy, Numba or CUDA and is gated bit-exact;
+          <code>port</code> retargets a kernel to JAX and is gated on a ULP bound;
+          <code>audit</code> runs the security scanners. The engine's own
+          example, a thirty-line column integration, goes through all eight
+          stages in one command.
+        </p>
+      </div>
+
+      <h3 id="engine-install"><span class="sec-no">1.1</span>Install and run</h3>
+      <div class="prose">
+        <p>
+          You need <code>git</code>, Python 3.11 or newer, and <code>gfortran</code>
+          (the reference really is compiled). Then, in a terminal:
+        </p>
+        <pre><code>git clone https://github.com/a85tract/RecastEngine.git
+cd RecastEngine
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[fortran,translate,verify]"
+recast run translate examples/toy_physics --config examples/toy_physics/recast.json</code></pre>
+        <p>The last line prints one row per stage. This is a passing run:</p>
+        <pre><code>fortran:toy_physics
+  [ok ] frontend   fortran
+  [ok ] transform  translate.numpy
+  [ok ] verifier   static.rwset                sampled: 4 blocks match
+  [ok ] oracle     f2py-golden                 f2py:toy_physics:18afeebe0a929004
+  [ok ] verifier   differential.bitexact       bit_exact: 85 points across 2 subprogram(s), all bit-exact
+  [ok ] verifier   symbolic.notary             symbolic: no rewrites to notarize
+  [ok ] store      fs-evidence                 3 verdict(s) recorded
+
+1 unit(s), 3 verdict(s), all passed</code></pre>
+        <div class="note note-key">
+          <span class="note-tag">Key idea</span>
+          <p>
+            The translation is the easy half. The row that matters is
+            <code>differential.bitexact</code>: both versions ran on the same
+            random inputs, 85 of them, and every output matched to the last bit.
+            A run that could not compare anything says <code>FAILED</code>, not
+            <code>all passed</code>.
+          </p>
+        </div>
+        <p>
+          To translate your own module, put the <code>.f90</code> in a folder of
+          its own and point the engine at the folder. No settings file is needed
+          for a first run; one lets you say what realistic inputs look like.
+        </p>
+        <pre><code>recast run translate my_module</code></pre>
+      </div>
+
+      <h3 id="engine-output"><span class="sec-no">1.2</span>What comes out</h3>
+      <div class="prose">
+        <p>Nothing is written next to your Fortran. Everything lands under <code>output/</code>:</p>
+        <div class="table-wrap">
+          <table>
+            <tbody>
+              <tr><td><code>output/&lt;name&gt;/translate/…/candidate/*.py</code></td><td>the generated Python, every block labelled with the Fortran lines it came from; depends only on NumPy</td></tr>
+              <tr><td><code>output/&lt;name&gt;/evidence/…/*.json</code></td><td>one manifest per verdict: what was compared, how many points, the largest difference, the fingerprint of the code that was judged</td></tr>
+              <tr><td><code>--summary verification.json</code></td><td>the current state in one file, byte-identical across two correct runs, meant to be committed beside the Python you ship</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3 id="engine-docs"><span class="sec-no">1.3</span>Read next</h3>
+      <div class="prose">
+        <p>
+          The engine's <a href="https://github.com/a85tract/RecastEngine/tree/main/docs"><code>docs/</code></a>
+          are written for a scientist who has a Fortran file and does not live in a terminal:
+        </p>
+        <div class="table-wrap">
+          <table>
+            <tbody>
+              <tr><td><a href="https://github.com/a85tract/RecastEngine/blob/main/docs/getting-started.md">getting-started.md</a></td><td>install, the example read stage by stage, your own module, and what to do when a run is not all green</td></tr>
+              <tr><td><a href="https://github.com/a85tract/RecastEngine/blob/main/docs/reading-the-evidence.md">reading-the-evidence.md</a></td><td>the summary and the manifests field by field, and what a passing run does and does not claim</td></tr>
+              <tr><td><a href="https://github.com/a85tract/RecastEngine/blob/main/docs/case-clm-ml.md">case-clm-ml.md</a></td><td>a real model, 76 modules, taken to NumPy and JAX and held to the Fortran for a month</td></tr>
+              <tr><td><a href="https://github.com/a85tract/RecastEngine/blob/main/docs/cli.md">cli.md</a></td><td>every command, the settings keys, the exit codes</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="ch-nav">
+        <span></span>
+        <a class="next" href="#cesm">Next →<b>CESM Case</b></a>
+      </div>
+    </section>
+
+    <!-- ============================ 2 ============================ -->
+    <section class="chapter" id="cesm">
+      <div class="ch-head">
+        <div class="ch-no">Chapter 2</div>
+        <h2>CESM Case</h2>
+        <p class="ch-lede">
+          The first model the engine is used on: the Community Earth System
+          Model. Two atmosphere pipelines, one land-model reproduction, and a
+          shared validation layer. Every component is its own repository.
+        </p>
+      </div>
+
+      <h3 id="cesm-pipelines"><span class="sec-no">2.1</span>Two pipelines</h3>
+      <div class="prose">
+        <div class="table-wrap">
+          <table class="compare">
+            <thead>
+              <tr><th></th><th>Pipeline 1</th><th>Pipeline 2</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Model</th><td><strong>CAM5</strong></td><td><strong>CAM6</strong></td></tr>
+              <tr><th scope="row">Approach</th><td>Rewrite to Python and <strong>decouple</strong> the physics into modules; Codon-compiled</td><td>Rewrite to <strong>Python/JAX and Numba</strong>, GPU-accelerated kernels</td></tr>
+              <tr><th scope="row">Bar</th><td>Bit-for-bit with the native Fortran, selected at run time per entry point</td><td>Scheme by scheme against native CESM output</td></tr>
+              <tr><th scope="row">Repositories</th><td><a href="https://github.com/a85tract/PyCAM5">PyCAM5</a>, <a href="https://github.com/a85tract/freeCAM">freeCAM</a></td><td>JaxCAM6, NumbaCAM6 <span class="muted">(private)</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          <a href="https://github.com/a85tract/PyCAM5">PyCAM5</a> replaces the
+          Fortran with Codon-compiled Python inside the CAM component.
+          <a href="https://github.com/a85tract/freeCAM">freeCAM</a> comes from
+          the other end: Python owns the control path, clock and coupling, and
+          the original Fortran keeps supplying the numerics through generated
+          <code>bind(C)</code> adapters.
+        </p>
+      </div>
+
+      <h3 id="cesm-clm"><span class="sec-no">2.2</span>The canopy model, held to the Fortran for a month</h3>
+      <div class="prose">
+        <p>
+          The land side is where the engine's evidence reaches furthest. The
+          multilayer canopy of the Community Land Model (CLM-ml v2, 76 Fortran
+          modules) was taken to NumPy and JAX under the engine and a small
+          domain extension, reproducing
+          <a href="https://arxiv.org/abs/2606.07681">arXiv:2606.07681</a>:
+        </p>
+        <ul>
+          <li>all 15 canopy physics modules bit-exact against the Fortran on the model's own recorded state;</li>
+          <li>the whole time step bit-exact on 902,544 points, and the closed-loop month bit-for-bit in NumPy;</li>
+          <li>the JAX month inside the paper's 1% band by one to four orders of magnitude, with gradients through the full step;</li>
+          <li>two defects found in the upstream model by the gates, reported as issues rather than patched.</li>
+        </ul>
+        <div class="note note-honest">
+          <span class="note-tag">Honest note</span>
+          <p>
+            Soil hydrology and the tower forcing stay recorded rather than
+            closed, and the throughput figure is a single-point CPU number.
+            The full account, with every intermediate number, is
+            <a href="https://github.com/a85tract/RecastEngine/blob/main/docs/case-clm-ml.md">case-clm-ml.md</a>.
+          </p>
+        </div>
+      </div>
+
+      <h3 id="cesm-trust"><span class="sec-no">2.3</span>Validation and security</h3>
+      <div class="prose">
+        <p>
+          A separate layer by design: a gate the gated thing can influence is
+          not a gate.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <tbody>
+              <tr><td><a href="https://github.com/a85tract/CESM-CC-Test">CC-Test</a></td><td>the CI gate for both <strong>C</strong>orrectness and <strong>C</strong>yber testing: the same secret scan, SBOM and CVE check, source audit and sanitizer builds run locally before a push and in the cloud on every pull request</td></tr>
+              <tr><td>Sec-Track <span class="muted">(restricted)</span></td><td>the record of N-day and responsibly disclosed vulnerabilities across the modernized software, its dependencies and the runtime; access is granted per person, so it is listed here by name and never as a number</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="ch-nav">
+        <a class="prev" href="#engine">← Previous<b>RecastEngine</b></a>
+        <a class="next" href="#contribute">Next →<b>Contributing</b></a>
+      </div>
+    </section>
+
+    <!-- ============================ 3 ============================ -->
+    <section class="chapter" id="contribute">
+      <div class="ch-head">
+        <div class="ch-no">Chapter 3</div>
+        <h2>Contributing</h2>
+        <p class="ch-lede">Where to send what, and how to extend the engine.</p>
+      </div>
+
+      <h3 id="contribute-where"><span class="sec-no">3.1</span>Where to send what</h3>
+      <div class="prose">
+        <div class="table-wrap">
+          <table class="route">
+            <thead><tr><th>What you have</th><th>Where it goes</th></tr></thead>
+            <tbody>
+              <tr><td>A translation that is wrong, or a rule that should exist</td><td><a href="https://github.com/a85tract/RecastEngine/issues">RecastEngine issues</a>, with the console output of the run</td></tr>
+              <tr><td>A bug or an idea in a component</td><td>that component's own repository: <a href="https://github.com/a85tract/PyCAM5">PyCAM5</a>, <a href="https://github.com/a85tract/freeCAM">freeCAM</a>, <a href="https://github.com/a85tract/CESM-CC-Test">CC-Test</a></td></tr>
+              <tr><td><strong>A security vulnerability</strong></td><td><strong>never a public issue</strong>: a private GitHub security advisory, or the address below</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3 id="contribute-extend"><span class="sec-no">3.2</span>Extending the engine</h3>
+      <div class="prose">
+        <p>
+          Implement one of the ten interfaces in
+          <a href="https://github.com/a85tract/RecastEngine/tree/main/src/recast/plugins"><code>src/recast/plugins/</code></a>
+          and register an entry point;
+          <a href="https://github.com/a85tract/RecastEngine/blob/main/docs/writing-a-plugin.md">writing-a-plugin.md</a>
+          walks through it. Knowledge of your model or your cluster belongs in a
+          plugin, not in the engine: the engine passing its tests with every
+          domain package uninstalled is a standing check.
+        </p>
+      </div>
+
+      <h3 id="contribute-contact"><span class="sec-no">3.3</span>Contact</h3>
+      <div class="prose">
+        <p>
+          <strong>Security vulnerabilities, collaboration, and licensing:</strong>
+          Yueqi Chen, University of Colorado Boulder,
+          <a href="mailto:yueqi.chen@colorado.edu">yueqi.chen@colorado.edu</a>.
+          For a vulnerability, please do not open a public issue.
+        </p>
+      </div>
+
+      <div class="ch-nav">
+        <a class="prev" href="#cesm">← Previous<b>CESM Case</b></a>
+        <a class="next" href="#top">Back to top ↑<b>SciRecast</b></a>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer class="footer">
+  <p>An agentic ecosystem for modernizing legacy scientific software. LLM agents do the porting; nothing ships until it has been checked against the original.</p>
+  <p class="small"><a href="https://github.com/a85tract/SciRecast">Repository</a> · <a href="https://github.com/a85tract/RecastEngine">RecastEngine</a> · Apache License 2.0</p>
+</footer>
+
+<script src="assets/js/site.js"></script>
+</body>
+</html>
