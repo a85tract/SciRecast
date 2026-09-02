@@ -353,7 +353,7 @@ main { min-width: 0; padding-bottom: 40px; }
 /* a page that is not the front page opens with a chapter head instead */
 .ch-head { margin: 34px 0 6px; }
 .ch-head .ch-no { font-size: 13px; letter-spacing: 0.14em; margin-bottom: 0; }
-.ch-head h1 {
+.ch-head h1, .ch-head h2 {
   font-size: clamp(30px, 5vw, 44px);
   font-weight: 600;
   margin-top: 8px;
@@ -381,7 +381,41 @@ main { min-width: 0; padding-bottom: 40px; }
 .btn.primary { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 .btn.primary:hover { opacity: 0.92; color: var(--bg); }
 
-/* ---------- prose (rendered markdown) ---------- */
+/* ---------- chapters ---------- */
+.chapter { padding-top: 34px; scroll-margin-top: 56px; }
+.chapter h3 {
+  font-family: var(--f-display);
+  font-size: clamp(22px, 3vw, 27px);
+  font-weight: 600;
+  margin: 2.2em 0 0.7em;
+  scroll-margin-top: 72px;
+}
+.chapter h3 .sec-no {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  color: var(--cz-ink);
+  letter-spacing: 0.14em;
+  margin-right: 12px;
+  font-weight: 600;
+  vertical-align: 0.3em;
+}
+.formula {
+  max-width: 70ch;
+  margin: 1.3em 0;
+  padding: 14px 20px;
+  font-family: var(--f-mono);
+  font-size: 15.5px;
+  line-height: 2;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.formula.center { text-align: center; }
+.formula .dim { color: var(--ink3); }
+
+/* ---------- prose ---------- */
 .prose { padding-top: 6px; }
 .prose > p, .prose > ul, .prose > ol { max-width: 70ch; }
 .prose h2 {
@@ -452,7 +486,7 @@ main { min-width: 0; padding-bottom: 40px; }
 .note p:last-child { margin-bottom: 0; }
 
 /* code blocks (kramdown + rouge) */
-.prose pre, .highlight pre {
+.prose pre {
   margin: 1.3em 0;
   padding: 14px 18px;
   font-family: var(--f-mono);
@@ -465,14 +499,6 @@ main { min-width: 0; padding-bottom: 40px; }
   color: var(--ink);
 }
 .prose pre code { background: transparent; border: 0; padding: 0; font-size: inherit; }
-.highlight .c, .highlight .c1, .highlight .cm { color: var(--ink3); font-style: italic; }
-.highlight .k, .highlight .kd, .highlight .kn, .highlight .kt { color: var(--cz-ink); font-weight: 600; }
-.highlight .s, .highlight .s1, .highlight .s2, .highlight .sb { color: var(--cx-ink); }
-.highlight .nf, .highlight .nb { color: var(--ink); font-weight: 600; }
-.highlight .mi, .highlight .mf { color: var(--cd); }
-.highlight .gp { color: var(--ink3); user-select: none; }
-.highlight .go { color: var(--ink2); }
-.highlight .err { color: inherit; background: transparent; }
 
 /* tables */
 .prose table, .table-wrap table {
@@ -518,22 +544,6 @@ main { min-width: 0; padding-bottom: 40px; }
 /* a table whose header row is empty (markdown "| | |") drops it */
 .prose thead.empty { display: none; }
 
-/* mermaid figures */
-.prose pre.mermaid, .prose .mermaid {
-  background:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 22px 22px;
-  background-color: var(--bg2);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 18px;
-  margin: 1.6em 0;
-  overflow-x: auto;
-  text-align: center;
-}
-.prose pre.mermaid svg { display: inline-block; height: auto; }
-
 /* ---------- chapter nav / footer ---------- */
 .ch-nav {
   display: flex;
@@ -550,6 +560,7 @@ main { min-width: 0; padding-bottom: 40px; }
   max-width: 46%;
 }
 .ch-nav a.next { text-align: right; margin-left: auto; }
+.ch-nav a.prev { margin-right: auto; }
 .ch-nav a b { display: block; color: var(--ink); font-size: 15px; margin-top: 2px; font-family: var(--f-display); }
 .ch-nav a:hover b { color: var(--cz-ink); }
 
