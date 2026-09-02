@@ -349,6 +349,9 @@ main { min-width: 0; padding-bottom: 40px; }
 }
 .hero .promise .mono { color: var(--cx-ink); font-weight: 600; }
 .hero .cta-row { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.hero-figure { margin: 34px 0 0; max-width: 880px; }
+.hero-figure svg { display: block; width: 100%; height: auto; }
+@media (max-width: 640px) { .hero-figure { display: none; } }
 
 /* a page that is not the front page opens with a chapter head instead */
 .ch-head { margin: 34px 0 6px; }
