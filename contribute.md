@@ -1,9 +1,10 @@
 ---
 title: Contributing
 nav_order: 4
+eyebrow: How to reach us
+lede: >-
+  Where to send what, and how to extend the engine.
 ---
-
-# Contributing
 
 ## Where to send what
 

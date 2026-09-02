@@ -1,33 +1,33 @@
 # GitHub Pages configuration.
 #
 # One file per tab: index.md is the architecture, engine.md the engine, cesm.md
-# the first case, contribute.md how to reach us. The sidebar is built from each
-# page's own front matter -- so adding a tab means adding a file rather than
-# editing a list that can disagree with what exists.
-
+# the first case, contribute.md how to reach us. The rail and the top bar are
+# built from each page's own front matter (`nav_order`, `title`, `lede`) -- so
+# adding a tab means adding a file rather than editing a list that can disagree
+# with what exists.
+#
+# The layout is the site's own (_layouts/default.html, assets/css/site.css,
+# assets/js/site.js): no remote theme, so a theme update cannot restyle the
+# site under it, and the design system is one file a reader can open.
+# Mermaid fences are rendered by the layout's own loader.
+#
 # RecastEngine/ and cesm/ are not in this repository; they are excluded because a
 # developer's working clones often sit there, and Jekyll would otherwise try to
 # render them.
+# Project site: served under /SciRecast/, so every asset and page link is
+# built through relative_url with this prefix.
+baseurl: "/SciRecast"
+url: "https://a85tract.github.io"
+
 title: SciRecast
 description: >-
   An agentic ecosystem for modernizing legacy scientific software. LLM agents do
   the porting; nothing ships until it has been checked against the original.
 
-# The theme is fetched at build time rather than vendored. jekyll-remote-theme
-# has to be listed explicitly: without it the build silently succeeds and
-# publishes pages with no layout at all.
-remote_theme: just-the-docs/just-the-docs
-plugins:
-  - jekyll-remote-theme
-
-# The theme's own palette is purple. This one is the palette the site already
-# used, which is GitHub's -- see _sass/color_schemes/.
-color_scheme: scirecast
-search_enabled: true
-
-# The theme renders ```mermaid fences itself, which is why no loader lives here.
-mermaid:
-  version: "11.4.1"
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
 
 aux_links:
   Repository:
@@ -41,5 +41,14 @@ defaults:
 
 exclude:
   - RecastEngine/
+  - RecastEngine-clm/
+  - recast-cesm/
+  - recast-clm-ml/
   - cesm/
+  - e3sm/
+  - ilamb_agent/
+  - ilamb_agent-taint/
   - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor/

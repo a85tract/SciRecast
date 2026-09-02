@@ -1,16 +1,24 @@
 ---
 title: Architecture
 nav_order: 1
+hero: true
+eyebrow: An open-source, agentic ecosystem
+hero_title: Modernizing legacy scientific software, <span class="accent">held to the original</span>
+lede: >-
+  LLM agents do the labor-intensive porting work under human oversight; every
+  artifact ships only after passing correctness validation and security review.
+  This page is the architecture: what the three layers are and why the
+  boundaries fall where they do.
+promise: >-
+  <span class="mono">bit-exact</span> is the bar. Nothing here ships on a
+  reading of the code; a gate compares it against the compiled original.
+cta:
+  href: "#the-three-layers-seen-through-the-cesm-case"
+  label: "Start with the layers ↓"
+  note: "Then the engine, the first case, and how to contribute."
 ---
 
-# SciRecast
-
-**An open-source, agentic ecosystem for modernizing legacy scientific software.**
-
-LLM agents do the labor-intensive porting work under human oversight; every
-artifact ships only after passing correctness validation and security review.
-This page is the architecture — what the three layers are and why the boundaries
-fall where they do. The engine and the first case each have their own:
+The engine and the first case each have a page of their own:
 
 | | |
 |---|---|

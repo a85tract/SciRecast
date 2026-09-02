@@ -1,13 +1,11 @@
 ---
 title: CESM Case
 nav_order: 3
+eyebrow: The first case
+lede: >-
+  Two pipelines, one shared validation layer. Every component below is its own
+  repository.
 ---
-
-# CESM Modernization
-
-**SciRecast's first case.**
-
-Two pipelines, one shared validation layer. Every component below is its own repository.
 
 ## Two modernization pipelines
 
