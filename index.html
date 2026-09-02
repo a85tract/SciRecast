@@ -61,9 +61,10 @@
   <nav class="rail" aria-label="contents">
     <p class="rail-title">Contents</p>
     <a href="#engine"><span class="n">1</span>RecastEngine</a>
-    <a class="sub" href="#engine-install">Install and run</a>
-    <a class="sub" href="#engine-output">What comes out</a>
-    <a class="sub" href="#engine-docs">Read next</a>
+    <a class="sub" href="#engine-spine">One spine</a>
+    <a class="sub" href="#engine-recipes">Four recipes</a>
+    <a class="sub" href="#engine-plugins">Ten kinds of plugin</a>
+    <a class="sub" href="#engine-gates">What a gate concludes</a>
     <a href="#cesm"><span class="n">2</span>CESM Case</a>
     <a class="sub" href="#cesm-pipelines">Two pipelines</a>
     <a class="sub" href="#cesm-clm">The canopy model</a>
@@ -89,99 +90,136 @@
         <div class="ch-no">Chapter 1</div>
         <h2>RecastEngine</h2>
         <p class="ch-lede">
-          The engine is the reusable part of SciRecast: it reads your Fortran,
-          writes Python, compiles the untouched Fortran as the reference, and
-          refuses to call the translation correct unless every output agrees
-          bit for bit. It knows nothing about any particular model; domain
-          knowledge attaches through a plugin contract.
+          The engine is the reusable part of SciRecast. It reads legacy
+          source, writes the modern version, compiles the untouched original
+          as the reference, and refuses to call the result correct unless a
+          gate says so. It knows nothing about any particular model: domain
+          knowledge attaches through plugins, and the engine passing its
+          tests with every domain package uninstalled is a standing check.
         </p>
       </div>
 
+      <div class="prose">
+        <p>
+          New here? <a href="https://github.com/a85tract/RecastEngine/blob/main/docs/getting-started.md">Getting started</a>
+          takes you from an empty machine to a verified translation of your
+          own module in about twenty minutes. This chapter is the map.
+        </p>
+      </div>
+
+      <h3 id="engine-spine"><span class="sec-no">1.1</span>One spine</h3>
       <div class="prose">
         <div class="formula center">
           discover <span class="dim">→</span> analyze <span class="dim">→</span> transform <span class="dim">→</span> verify <span class="dim">→</span> record
         </div>
         <p>
-          One spine, walked by every workload. <code>translate</code> takes
-          Fortran to NumPy, Numba or CUDA and is gated bit-exact;
-          <code>port</code> retargets a kernel to JAX and is gated on a ULP bound;
-          <code>audit</code> runs the security scanners. The engine's own
-          example, a thirty-line column integration, goes through all eight
-          stages in one command.
+          Every workload walks the same five steps. A <em>frontend</em> discovers
+          the units of a source tree and analyzes each into facts; a
+          <em>transform</em> turns the facts into a candidate; an <em>oracle</em>
+          builds the reference; <em>verifiers</em> compare candidate and
+          reference and return a verdict; a <em>store</em> records the verdict
+          as evidence. A <strong>recipe</strong> is a list of those stages with
+          a plugin named for each slot, and which stages are gates.
         </p>
       </div>
 
-      <h3 id="engine-install"><span class="sec-no">1.1</span>Install and run</h3>
+      <h3 id="engine-recipes"><span class="sec-no">1.2</span>Four recipes</h3>
       <div class="prose">
-        <p>
-          You need <code>git</code>, Python 3.11 or newer, and <code>gfortran</code>
-          (the reference really is compiled). Then, in a terminal:
-        </p>
-        <pre><code>git clone https://github.com/a85tract/RecastEngine.git
-cd RecastEngine
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e ".[fortran,translate,verify]"
-recast run translate examples/toy_physics --config examples/toy_physics/recast.json</code></pre>
-        <p>The last line prints one row per stage. This is a passing run:</p>
-        <pre><code>fortran:toy_physics
-  [ok ] frontend   fortran
-  [ok ] transform  translate.numpy
-  [ok ] verifier   static.rwset                sampled: 4 blocks match
-  [ok ] oracle     f2py-golden                 f2py:toy_physics:18afeebe0a929004
-  [ok ] verifier   differential.bitexact       bit_exact: 85 points across 2 subprogram(s), all bit-exact
-  [ok ] verifier   symbolic.notary             symbolic: no rewrites to notarize
-  [ok ] store      fs-evidence                 3 verdict(s) recorded
-
-1 unit(s), 3 verdict(s), all passed</code></pre>
-        <div class="note note-key">
-          <span class="note-tag">Key idea</span>
-          <p>
-            The translation is the easy half. The row that matters is
-            <code>differential.bitexact</code>: both versions ran on the same
-            random inputs, 85 of them, and every output matched to the last bit.
-            A run that could not compare anything says <code>FAILED</code>, not
-            <code>all passed</code>.
-          </p>
-        </div>
-        <p>
-          To translate your own module, put the <code>.f90</code> in a folder of
-          its own and point the engine at the folder. No settings file is needed
-          for a first run; one lets you say what realistic inputs look like.
-        </p>
-        <pre><code>recast run translate my_module</code></pre>
-      </div>
-
-      <h3 id="engine-output"><span class="sec-no">1.2</span>What comes out</h3>
-      <div class="prose">
-        <p>Nothing is written next to your Fortran. Everything lands under <code>output/</code>:</p>
         <div class="table-wrap">
-          <table>
+          <table class="route">
+            <thead><tr><th>Recipe</th><th>What it does, and how far it reaches</th></tr></thead>
             <tbody>
-              <tr><td><code>output/&lt;name&gt;/translate/…/candidate/*.py</code></td><td>the generated Python, every block labelled with the Fortran lines it came from; depends only on NumPy</td></tr>
-              <tr><td><code>output/&lt;name&gt;/evidence/…/*.json</code></td><td>one manifest per verdict: what was compared, how many points, the largest difference, the fingerprint of the code that was judged</td></tr>
-              <tr><td><code>--summary verification.json</code></td><td>the current state in one file, byte-identical across two correct runs, meant to be committed beside the Python you ship</td></tr>
+              <tr><td><code>translate</code></td><td>Fortran to NumPy, Numba or CUDA, gated <strong>bit-exact</strong> against the compiled Fortran. Runs end to end. <code>target: tree</code> bundles the sibling modules a unit <code>use</code>s.</td></tr>
+              <tr><td><code>port</code></td><td>Retarget a kernel to JAX (or Numba, CUDA), gated on a ULP bound against the NumPy translation, or on captured production dumps with <code>oracle: dump-replay</code>. Runs end to end.</td></tr>
+              <tr><td><code>audit</code></td><td>Secret scan and SBOM, CVE and VEX, gating the way a DevSecOps pipeline does. Plans clean on the shipped scanners.</td></tr>
+              <tr><td><code>refactor-todo</code></td><td>Restructure architecture without touching numerics, gated on a full model run. Declares four slots nothing fills yet; the name carries its incompleteness.</td></tr>
             </tbody>
           </table>
         </div>
+        <p>
+          <code>recast recipes</code> lists them; <code>recast plan &lt;recipe&gt;</code>
+          shows the stages a run would walk and marks a slot nothing fills as
+          <code>[MISS]</code>, before anything compiles.
+        </p>
+        <pre><code>$ recast plan translate --config '{"target": "numba"}'
+ 1. [ok ] executor     local
+ 2. [ok ] frontend     fortran
+ 3. [ok ] transform    translate.numba
+ 4. [ok ] verifier     static.rwset                 gate
+ 5. [ok ] oracle       f2py-golden
+ 6. [ok ] verifier     differential.bitexact        gate
+ 7. [ok ] verifier     symbolic.notary              optional
+ 8. [ok ] store        fs-evidence</code></pre>
       </div>
 
-      <h3 id="engine-docs"><span class="sec-no">1.3</span>Read next</h3>
+      <h3 id="engine-plugins"><span class="sec-no">1.3</span>Ten kinds of plugin</h3>
       <div class="prose">
         <p>
-          The engine's <a href="https://github.com/a85tract/RecastEngine/tree/main/docs"><code>docs/</code></a>
-          are written for a scientist who has a Fortran file and does not live in a terminal:
+          Every capability arrives through an entry point, including the
+          engine's own: there is no privileged built-in path. This is what the
+          engine registers with no domain extension installed.
         </p>
         <div class="table-wrap">
           <table>
+            <thead><tr><th>Kind</th><th>Answers</th><th>Registered</th></tr></thead>
             <tbody>
-              <tr><td><a href="https://github.com/a85tract/RecastEngine/blob/main/docs/getting-started.md">getting-started.md</a></td><td>install, the example read stage by stage, your own module, and what to do when a run is not all green</td></tr>
-              <tr><td><a href="https://github.com/a85tract/RecastEngine/blob/main/docs/reading-the-evidence.md">reading-the-evidence.md</a></td><td>the summary and the manifests field by field, and what a passing run does and does not claim</td></tr>
-              <tr><td><a href="https://github.com/a85tract/RecastEngine/blob/main/docs/case-clm-ml.md">case-clm-ml.md</a></td><td>a real model, 76 modules, taken to NumPy and JAX and held to the Fortran for a month</td></tr>
-              <tr><td><a href="https://github.com/a85tract/RecastEngine/blob/main/docs/cli.md">cli.md</a></td><td>every command, the settings keys, the exit codes</td></tr>
+              <tr><td>frontend</td><td>what the units of a tree are, and the facts about each</td><td><code>fortran</code></td></tr>
+              <tr><td>transform</td><td>the candidate</td><td><code>translate.numpy</code> <code>translate.numba</code> <code>translate.cuda</code> <code>translate.tree</code> <code>port.jax</code> <code>port.tree-jax</code></td></tr>
+              <tr><td>oracle</td><td>the reference to compare against</td><td><code>f2py-golden</code> <code>f2py-golden-flat</code> <code>numpy-anchor</code> <code>dump-replay</code></td></tr>
+              <tr><td>verifier</td><td>a verdict, with the numbers behind it</td><td><code>static.rwset</code> <code>differential.bitexact</code> <code>differential.tolerance</code> <code>symbolic.notary</code></td></tr>
+              <tr><td>scanner</td><td>findings over a repository</td><td><code>secret</code> <code>composition</code></td></tr>
+              <tr><td>adjudicator</td><td>which findings stand</td><td><span class="muted">none shipped; the contract is kept</span></td></tr>
+              <tr><td>executor</td><td>where a job runs</td><td><code>local</code></td></tr>
+              <tr><td>store</td><td>where verdicts and findings go</td><td><code>fs-evidence</code> <code>fs-findings</code></td></tr>
+              <tr><td>agent</td><td>an LLM behind a transform that needs one</td><td><span class="muted">none shipped</span></td></tr>
+              <tr><td>recipe</td><td>the stages of a workload</td><td><code>translate</code> <code>port</code> <code>audit</code> <code>refactor-todo</code></td></tr>
             </tbody>
           </table>
         </div>
+        <p>
+          A domain extension adds to this list by declaring the same
+          entry-point groups, with no change to the engine: the CESM
+          extension supplies a <code>cesm</code> frontend, a
+          <code>translate.cam</code> transform and a <code>translate-cam</code>
+          recipe that way, and the CLM-ml extension of
+          <a href="#cesm-clm">§2.2</a> a <code>clm-ml</code> frontend and its
+          own oracle. <code>recast plugins</code> prints what is registered,
+          by kind. To write one, implement the interface in
+          <a href="https://github.com/a85tract/RecastEngine/tree/main/src/recast/plugins"><code>src/recast/plugins/</code></a>
+          and run the <a href="https://github.com/a85tract/RecastEngine/tree/main/conformance">conformance suite</a>
+          against it; <a href="https://github.com/a85tract/RecastEngine/blob/main/docs/writing-a-plugin.md">writing-a-plugin.md</a>
+          walks through it.
+        </p>
+      </div>
+
+      <h3 id="engine-gates"><span class="sec-no">1.4</span>What a gate concludes</h3>
+      <div class="prose">
+        <p>
+          A verdict carries a <em>confidence</em> that says what kind of claim
+          it makes, and the countable metrics behind it. On the engine's own
+          example, a thirty-line column integration:
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Verifier</th><th>Confidence</th><th>Metrics</th></tr></thead>
+            <tbody>
+              <tr><td><code>static.rwset</code></td><td><strong>sampled</strong></td><td>blocks_checked=4, blocks_matched=4</td></tr>
+              <tr><td><code>differential.bitexact</code></td><td><strong>bit_exact</strong></td><td>points=85, bit_exact=85, max_ulp=0</td></tr>
+              <tr><td><code>symbolic.notary</code></td><td><strong>symbolic</strong></td><td>rewrites=0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Every run writes one manifest per verdict under <code>output/</code>,
+          and <code>--summary</code> writes the current state to one file that
+          is byte-identical across two correct runs, meant to be committed
+          beside the code it vouches for. The engine's CI regenerates the
+          example's summary on a clean machine and fails on any difference.
+          <a href="https://github.com/a85tract/RecastEngine/blob/main/docs/reading-the-evidence.md">Reading the evidence</a>
+          says what each field means and what a passing run does not claim;
+          <a href="https://github.com/a85tract/RecastEngine/blob/main/docs/">docs/</a>
+          has the rest.
+        </p>
       </div>
 
       <div class="ch-nav">
