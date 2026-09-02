@@ -62,9 +62,6 @@
     <p class="rail-title">Contents</p>
     <a href="#engine"><span class="n">1</span>RecastEngine</a>
     <a href="#cesm"><span class="n">2</span>CESM Case</a>
-    <a class="sub" href="#cesm-pipelines">Two pipelines</a>
-    <a class="sub" href="#cesm-clm">The canopy model</a>
-    <a class="sub" href="#cesm-trust">Validation and security</a>
     <a href="#contribute"><span class="n">3</span>Contributing</a>
     <a class="sub" href="#contribute-where">Where to send what</a>
     <a class="sub" href="#contribute-extend">Extending the engine</a>
@@ -116,12 +113,11 @@
         <h2>CESM Case</h2>
         <p class="ch-lede">
           The first model the engine is used on: the Community Earth System
-          Model. Two atmosphere pipelines, one land-model reproduction, and a
-          shared validation layer. Every component is its own repository.
+          Model. Two atmosphere pipelines and a shared validation layer. Every
+          component is its own repository.
         </p>
       </div>
 
-      <h3 id="cesm-pipelines"><span class="sec-no">2.1</span>Two pipelines</h3>
       <div class="prose">
         <div class="table-wrap">
           <table class="compare">
@@ -133,6 +129,7 @@
               <tr><th scope="row">Approach</th><td>Rewrite to Python and <strong>decouple</strong> the physics into modules; Codon-compiled</td><td>Rewrite to <strong>Python/JAX and Numba</strong>, GPU-accelerated kernels</td></tr>
               <tr><th scope="row">Bar</th><td>Bit-for-bit with the native Fortran, selected at run time per entry point</td><td>Scheme by scheme against native CESM output</td></tr>
               <tr><th scope="row">Repositories</th><td><a href="https://github.com/a85tract/PyCAM5">PyCAM5</a>, <a href="https://github.com/a85tract/freeCAM">freeCAM</a></td><td>JaxCAM6, NumbaCAM6 <span class="muted">(private)</span></td></tr>
+              <tr><th scope="row">Validation and security</th><td colspan="2"><a href="https://github.com/a85tract/CESM-CC-Test">CC-Test</a>, the CI gate for both <strong>C</strong>orrectness and <strong>C</strong>yber testing; Sec-Track <span class="muted">(restricted)</span>, the vulnerability record. A separate layer by design: a gate the gated thing can influence is not a gate.</td></tr>
             </tbody>
           </table>
         </div>
@@ -144,48 +141,6 @@
           the original Fortran keeps supplying the numerics through generated
           <code>bind(C)</code> adapters.
         </p>
-      </div>
-
-      <h3 id="cesm-clm"><span class="sec-no">2.2</span>The canopy model, held to the Fortran for a month</h3>
-      <div class="prose">
-        <p>
-          The land side is where the engine's evidence reaches furthest. The
-          multilayer canopy of the Community Land Model (CLM-ml v2, 76 Fortran
-          modules) was taken to NumPy and JAX under the engine and a small
-          domain extension, reproducing
-          <a href="https://arxiv.org/abs/2606.07681">arXiv:2606.07681</a>:
-        </p>
-        <ul>
-          <li>all 15 canopy physics modules bit-exact against the Fortran on the model's own recorded state;</li>
-          <li>the whole time step bit-exact on 902,544 points, and the closed-loop month bit-for-bit in NumPy;</li>
-          <li>the JAX month inside the paper's 1% band by one to four orders of magnitude, with gradients through the full step;</li>
-          <li>two defects found in the upstream model by the gates, reported as issues rather than patched.</li>
-        </ul>
-        <div class="note note-honest">
-          <span class="note-tag">Honest note</span>
-          <p>
-            Soil hydrology and the tower forcing stay recorded rather than
-            closed, and the throughput figure is a single-point CPU number.
-            The full account, with every intermediate number, is
-            <a href="https://github.com/a85tract/RecastEngine/blob/main/docs/case-clm-ml.md">case-clm-ml.md</a>.
-          </p>
-        </div>
-      </div>
-
-      <h3 id="cesm-trust"><span class="sec-no">2.3</span>Validation and security</h3>
-      <div class="prose">
-        <p>
-          A separate layer by design: a gate the gated thing can influence is
-          not a gate.
-        </p>
-        <div class="table-wrap">
-          <table>
-            <tbody>
-              <tr><td><a href="https://github.com/a85tract/CESM-CC-Test">CC-Test</a></td><td>the CI gate for both <strong>C</strong>orrectness and <strong>C</strong>yber testing: the same secret scan, SBOM and CVE check, source audit and sanitizer builds run locally before a push and in the cloud on every pull request</td></tr>
-              <tr><td>Sec-Track <span class="muted">(restricted)</span></td><td>the record of N-day and responsibly disclosed vulnerabilities across the modernized software, its dependencies and the runtime; access is granted per person, so it is listed here by name and never as a number</td></tr>
-            </tbody>
-          </table>
-        </div>
       </div>
 
       <div class="ch-nav">
