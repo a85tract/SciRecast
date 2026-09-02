@@ -1,15 +1,16 @@
 ---
 title: RecastEngine
 nav_order: 2
+eyebrow: The engine
+lede: >-
+  The modernization engine: the reusable, domain-independent part of
+  SciRecast. This page says what it is and what its own gates conclude; the
+  README in its repository says how to run it.
 ---
 
-# RecastEngine
-
-**The modernization engine — the reusable, domain-independent part of SciRecast.**
-
-The engine is its own repository — [`a85tract/RecastEngine`](https://github.com/a85tract/RecastEngine).
-This page says what it is and what its own gates conclude; the README there says how to run
-it.
+The engine is its own repository, [`a85tract/RecastEngine`](https://github.com/a85tract/RecastEngine),
+and its [`docs/`](https://github.com/a85tract/RecastEngine/tree/main/docs) start with a
+page for a scientist who has a Fortran file and does not live in a terminal.
 
 The engine produces nothing on its own. A product is what comes out when the
 engine is combined with the domain knowledge a particular effort needs and the

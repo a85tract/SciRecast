@@ -1,5 +1,0 @@
----
----
-// A stylesheet per scheme is what lets the page swap between them at runtime;
-// the active one compiles into just-the-docs-default.css on its own.
-{% include css/just-the-docs.scss.liquid color_scheme="scirecast-dark" %}
