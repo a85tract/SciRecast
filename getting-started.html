@@ -204,10 +204,10 @@ the command runs and reports plugins. If it does, you are installed.</p>
         <h2>Run the shipped example</h2>
       </div>
       <div class="prose">
-<p>The engine ships a tiny Fortran module, <code>examples/toy_physics/toy_physics.f90</code>,
+<p>The engine ships a tiny Fortran module, <code>corpus/toy_physics/toy_physics.f90</code>,
 that integrates pressure down a column. Open it if you like; it is thirty
 lines and looks like any Fortran you have written. Run the engine over it:</p>
-<pre><code>$ recast run translate examples/toy_physics --config examples/toy_physics/recast.json
+<pre><code>$ recast run translate corpus/toy_physics --config corpus/toy_physics/recast.json
 fortran:toy_physics
   [ok ] frontend   fortran
   [ok ] transform  translate.numpy
@@ -223,7 +223,7 @@ fortran:toy_physics
 1 unit(s), 3 verdict(s), all passed
 </code></pre>
 <p>The first time takes longer, because the compiler runs. The command has
-three parts: <code>run translate</code> says what to do, <code>examples/toy_physics</code> is the
+three parts: <code>run translate</code> says what to do, <code>corpus/toy_physics</code> is the
 folder holding the Fortran, and <code>--config ...</code> points at a small settings
 file we will come back to.</p>
 <h3 id="s3-1">Reading the output</h3>
@@ -340,7 +340,7 @@ end module &lt;name&gt;
 </code></pre>
 <p>Put your file in a folder of its own. The folder's name becomes the name of
 the run's output. Here is a real one; make a folder called <code>satvap</code> next to
-<code>examples</code> and save this as <code>satvap/satvap.f90</code>:</p>
+<code>corpus</code> and save this as <code>satvap/satvap.f90</code>:</p>
 <pre><code>! Saturation vapor pressure over water (Bolton 1980) and the mixing ratio
 ! it implies -- the kind of small kernel an analysis script carries around.
 module satvap
@@ -419,7 +419,7 @@ the file:</p>
 1 unit(s), 3 verdict(s), all passed
 </code></pre>
 <p>340 points: 20 calls of <code>esat</code>, and 20 calls of <code>mixing_ratio</code> with 16
-elements each. The <code>examples/toy_physics/recast.json</code> you passed in section
+elements each. The <code>corpus/toy_physics/recast.json</code> you passed in section
 3 is the same file for that module.</p>
       </div>
     </section>
