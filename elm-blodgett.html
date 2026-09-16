@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ELM at Blodgett · SciRecast</title>
+<meta name="description" content="A month of ELM translated from Fortran to JAX, differentiated through 1,488 steps and fitted to the Blodgett Forest flux tower; the Fortran model rerun agrees to 0.3 %.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+<style>
+/* page-local: the chart and the comparison tiles */
+.fig { margin: 1.4em 0; }
+.fig .legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 13.5px; color: var(--ink2); margin: 0 0 8px; }
+.fig .legend i { display: inline-block; width: 18px; height: 0; border-top: 2.5px solid; vertical-align: middle; margin-right: 7px; border-radius: 2px; }
+.fig .legend i.band { height: 10px; border: 0; background: var(--sel); outline: 1px solid var(--ink3); }
+.fig .chartwrap { position: relative; }
+.fig svg.chart { display: block; width: 100%; height: auto; background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; }
+.fig svg.chart text { font-family: var(--f-mono); font-size: 11.5px; fill: var(--ink2); }
+.fig svg.chart .title { font-family: var(--f-body); font-weight: 600; font-size: 14px; fill: var(--ink); }
+.fig svg.chart .grid { stroke: var(--grid2); stroke-width: 1; }
+.fig svg.chart .axis { stroke: var(--line2); stroke-width: 1; }
+.fig svg.chart .lbl { fill: var(--ink3); }
+.fig .tip { position: absolute; pointer-events: none; display: none; background: var(--bg2); border: 1px solid var(--line2); border-radius: 8px; padding: 7px 11px; font-family: var(--f-mono); font-size: 12.5px; line-height: 1.5; color: var(--ink); box-shadow: var(--shadow); white-space: nowrap; }
+.fig figcaption { font-size: 14px; color: var(--ink2); margin-top: 10px; max-width: 70ch; line-height: 1.6; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 1.4em 0; }
+.tiles div { padding: 16px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg2); }
+.tiles .k { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink3); font-weight: 600; }
+.tiles .v { font-family: var(--f-display); font-weight: 600; font-size: 40px; line-height: 1.05; margin: 8px 0 4px; font-variant-numeric: tabular-nums; }
+.tiles .v small { font-family: var(--f-body); font-size: 14px; color: var(--ink2); font-weight: 500; margin-left: 6px; }
+.tiles .s { font-size: 13.5px; color: var(--ink2); line-height: 1.55; }
+.tiles .chain .v { color: var(--cx-ink); } .tiles .model .v { color: var(--cz-ink); }
+.prose table.fit td, .prose table.fit th { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.prose table.fit td:first-child, .prose table.fit th:first-child, .prose table.fit td.meaning, .prose table.fit th.meaning { text-align: left; white-space: normal; }
+.prose table.fit td.meaning { color: var(--ink2); }
+.prose table.fit tr.total td { border-top: 2px solid var(--ink2); font-weight: 600; }
+.tag { display: inline-block; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; padding: 1px 7px; border-radius: 4px; border: 1px solid var(--cx); color: var(--cx-ink); vertical-align: middle; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--bg2); margin: 1.4em 0; }
+.facts div { padding: 12px 14px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.facts dt { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink3); font-weight: 600; }
+.facts dd { margin: 3px 0 0; font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.facts dd small { display: block; color: var(--ink2); font-size: 13px; }
+@media (max-width: 640px) { .facts div { border-right: 0; } }
+</style>
+<script>
+  try {
+    var t = localStorage.getItem("scirecast-theme");
+    if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="index.html">
+    <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><g stroke="currentColor" stroke-width="1.4" fill="none"><path d="M3 7h16M3 15h16M7 4v14M15 4v14"/><path d="M3 4v3M19 4v3M3 15v3M19 15v3" stroke-dasharray="2 2"/></g><circle cx="11" cy="11" r="2.1" fill="var(--cx)" stroke="none"/></svg>
+    SciRecast
+  </a>
+  <nav class="topnav" aria-label="section">
+    <a href="index.html#engine">RecastEngine</a>
+    <a href="index.html#cesm">CESM Case</a>
+    <a href="index.html#e3sm" class="active">E3SM Case</a>
+    <a href="getting-started.html">Getting started</a>
+  </nav>
+  <span class="spacer"></span>
+  <div class="aux">
+    <a href="https://github.com/a85tract/RecastEngine">Source ↗</a>
+  </div>
+  <div class="theme-switch" role="group" aria-label="Theme">
+    <button type="button" data-theme="system" aria-pressed="true" title="Follow the system">Auto</button>
+    <button type="button" data-theme="light" aria-pressed="false">Light</button>
+    <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+  </div>
+  <div class="progress-track"><div class="progress-bar"></div></div>
+</header>
+
+<div class="hero" id="top">
+  <div class="hero-inner">
+    <div class="eyebrow">E3SM case · ELM at US-Blo · July 2004</div>
+    <h1>A month of ELM, <span class="accent">differentiated</span></h1>
+    <p class="lede">
+      E3SM's land model, translated from Fortran to JAX by the engine, chained
+      through a month at the Blodgett Forest flux tower, and differentiated
+      backwards through all 1,488 half-hourly steps. The derivative was fitted
+      to the tower's GPP; the untouched Fortran model, rerun with the fitted
+      parameters, agreed with the prediction to 0.3&nbsp;%.
+    </p>
+    <div class="promise">
+      <span>Four parameters at their bounds: the JAX chain predicted GPP <span class="mono">x2.49</span> of the baseline; ELM itself, rerun, gave <span class="mono">x2.48</span>. The single-routine derivative had said <span class="mono">x2.32</span> for one of them alone.</span>
+    </div>
+    <figure class="hero-figure" aria-label="From the Fortran model to a fitted derivative and back to the model">
+      <svg viewBox="0 0 880 150" width="880" height="150" font-family="IBM Plex Mono, ui-monospace, Menlo, monospace" font-size="13">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ink3)"/></marker>
+          <marker id="arr-cz" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--cz)"/></marker>
+        </defs>
+        <g stroke="var(--line2)" stroke-width="1.4">
+          <rect x="12"  y="30" width="140" height="42" rx="9" fill="var(--bg2)"/>
+          <rect x="196" y="30" width="140" height="42" rx="9" fill="var(--bg2)"/>
+          <rect x="380" y="30" width="140" height="42" rx="9" fill="var(--bg2)"/>
+          <rect x="564" y="30" width="140" height="42" rx="9" fill="var(--cx-soft)" stroke="var(--cx)"/>
+          <rect x="748" y="30" width="120" height="42" rx="9" fill="var(--bg2)"/>
+        </g>
+        <g stroke="var(--ink3)" stroke-width="1.3" marker-end="url(#arr)">
+          <line x1="152" y1="51" x2="194" y2="51"/>
+          <line x1="336" y1="51" x2="378" y2="51"/>
+          <line x1="520" y1="51" x2="562" y2="51"/>
+          <line x1="704" y1="51" x2="746" y2="51"/>
+        </g>
+        <g fill="var(--ink)" text-anchor="middle" font-weight="500">
+          <text x="82"  y="56">Fortran ELM</text>
+          <text x="266" y="56">NumPy</text>
+          <text x="450" y="56">JAX chain</text>
+          <text x="634" y="56" fill="var(--cx-ink)" font-weight="600">jax.grad</text>
+          <text x="808" y="56">fit</text>
+        </g>
+        <g fill="var(--ink3)" text-anchor="middle" font-size="11.5">
+          <text x="82"  y="92">7 routines · recorded</text>
+          <text x="266" y="92">bit-exact, every step</text>
+          <text x="450" y="92">1,488 steps · no drift</text>
+          <text x="634" y="92">reverse mode · 741 s</text>
+          <text x="808" y="92">tower GPP · 1-D solves</text>
+        </g>
+        <!-- the model answers back -->
+        <path d="M808 72 C 808 128, 82 128, 82 74" fill="none" stroke="var(--cz)" stroke-width="1.3" stroke-dasharray="4 4" marker-end="url(#arr-cz)"/>
+        <text x="445" y="132" text-anchor="middle" fill="var(--cz-ink)" font-size="12" letter-spacing="0.12em">THE FORTRAN MODEL RERUNS WITH THE FITTED VALUES · 0.3 % APART</text>
+      </svg>
+    </figure>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="rail" aria-label="contents">
+    <p class="rail-title">Contents</p>
+    <a href="#s1"><span class="n">1</span>The site and the gap</a>
+    <a href="#s2"><span class="n">2</span>From Fortran to a derivative</a>
+    <a href="#s3"><span class="n">3</span>The chain is the model</a>
+    <a href="#s4"><span class="n">4</span>What the derivative said</a>
+    <a href="#s5"><span class="n">5</span>Then the Fortran model was asked</a>
+    <a href="#s6"><span class="n">6</span>What this shows, and what it does not</a>
+    <a href="#s7"><span class="n">7</span>Method</a>
+    <div class="rail-gap"></div>
+    <a href="index.html">← SciRecast</a>
+  </nav>
+  <main>
+    <details class="toc-mobile">
+      <summary>Contents</summary>
+      <nav>
+        <a href="#s1"><span class="n">1</span>The site and the gap</a>
+        <a href="#s2"><span class="n">2</span>From Fortran to a derivative</a>
+        <a href="#s3"><span class="n">3</span>The chain is the model</a>
+        <a href="#s4"><span class="n">4</span>What the derivative said</a>
+        <a href="#s5"><span class="n">5</span>Then the Fortran model was asked</a>
+        <a href="#s6"><span class="n">6</span>What this shows, and what it does not</a>
+        <a href="#s7"><span class="n">7</span>Method</a>
+      </nav>
+    </details>
+
+    <section class="chapter" id="s1">
+      <div class="ch-head">
+        <div class="ch-no">Section 1</div>
+        <h2>The site and the gap</h2>
+      </div>
+      <div class="prose">
+        <p>Blodgett Forest is a ponderosa pine plantation in the Sierra Nevada
+        foothills with a Mediterranean summer: no rain in July, the soil drying
+        down through the month. ELM run there at a single point, with the
+        tower's own GSWP3 forcing and satellite phenology, puts July 2004 GPP at
+        a sixth of what the tower measured, and its water-stress index says why
+        it thinks so.</p>
+        <dl class="facts">
+          <div><dt>Site</dt><dd>US-Blo, Blodgett Forest<small>38.90°N 120.63°W</small></dd></div>
+          <div><dt>Vegetation</dt><dd>Ponderosa pine<small>ELM PFT 1, needleleaf evergreen temperate</small></dd></div>
+          <div><dt>Window</dt><dd>July 2004<small>1,488 steps of 30 min</small></dd></div>
+          <div><dt>Tower GPP</dt><dd>7.20 ± 0.59<small>gC m⁻² d⁻¹, FLUXNET2015 via ILAMB</small></dd></div>
+          <div><dt>ELM GPP</dt><dd>1.14<small>gC m⁻² d⁻¹, BTRAN 0.30</small></dd></div>
+        </dl>
+        <p>The parameters that govern water stress in ELM, the soil potentials
+        at which stomata start to close and close fully and the two terms of
+        the root profile, are the obvious suspects. Whether they can close the
+        gap is a question about a month of coupled soil water, not about one
+        routine at one instant, and that is the question a derivative through
+        the whole step can answer.</p>
+      </div>
+    </section>
+
+    <section class="chapter" id="s2">
+      <div class="ch-head">
+        <div class="ch-no">Section 2</div>
+        <h2>From Fortran to a derivative</h2>
+      </div>
+      <div class="prose">
+        <p>The engine reads ELM's Fortran and emits two things: a NumPy
+        translation, gated bit-exact against the compiled original on state
+        recorded from the running model, and a JAX port, gated to 32 ULP.
+        Nothing on this page was ported by hand. The seven routines a step
+        calls between canopy interception and drainage were each translated,
+        recorded and gated, then chained: every quantity one routine writes and
+        the next reads unchanged is carried from kernel to kernel instead of
+        read back from the recording, so the soil water the month ends with is
+        the chain's own.</p>
+        <div class="note note-key">
+          <span class="note-tag">The instrument</span>
+          <p>Seven kernels inside one <code>lax.scan</code> over the month, one
+          checkpoint per step, and <code>jax.grad</code> of the month's GPP with
+          respect to the parameters. The forward pass reproduces the model's
+          soil water to 10⁻¹² relative at the end of July and its GPP to
+          10⁻¹⁴; the reverse pass takes 741 s for all parameters at once.</p>
+        </div>
+        <p>What the derivative gives is the <em>total</em> sensitivity along the
+        soil-water trajectory. When a parameter eases transpiration, the soil
+        dries faster and gives part of the gain back later in the month, and a
+        derivative taken through the month sees that. A derivative of one
+        routine at fixed soil water does not: for the closure potential
+        <code>smpsc</code> it predicted a x2.32 response to tripling the
+        parameter, where the month, and ELM itself, say x1.41.</p>
+      </div>
+    </section>
+
+    <section class="chapter" id="s3">
+      <div class="ch-head">
+        <div class="ch-no">Section 3</div>
+        <h2>The chain is the model</h2>
+      </div>
+      <div class="prose">
+        <p>Daily mean GPP through July. On the left, the chain on the model's
+        own parameters against the model's history tape. On the right, all four
+        water parameters pushed to the edge of their plausible range at once:
+        the chain's prediction, and what ELM produced when rerun from the same
+        restart with those values in its parameter file. The band is the
+        tower's monthly mean and its uncertainty.</p>
+        <figure class="fig">
+          <div class="legend"><span><i style="border-color:var(--cz)"></i>ELM, Fortran</span><span><i style="border-color:var(--cx)"></i>JAX chain</span><span><i class="band"></i>tower 7.20 ± 0.59</span></div>
+          <div class="chartwrap">
+            <svg class="chart" id="chart" viewBox="0 0 1000 400" role="img" aria-label="Daily GPP in July 2004: model and chain on baseline parameters, and with four water parameters at their bounds; tower mean band"></svg>
+            <div class="tip" id="tip"></div>
+          </div>
+          <figcaption>gC m⁻² d⁻¹, patch-level FPSN, daily means of 48 half-hourly values. Month means, baseline: ELM 1.145, chain 1.143. All four at bound: ELM 2.841, chain 2.849. Hover for a day's values and BTRAN.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="chapter" id="s4">
+      <div class="ch-head">
+        <div class="ch-no">Section 4</div>
+        <h2>What the derivative said</h2>
+      </div>
+      <div class="prose">
+        <p>One reverse pass gives the month's elasticity to every parameter at
+        once. The tower supplies one number, a monthly mean, so one parameter is
+        determined and any pair is not; each parameter was therefore solved
+        alone, as a bounded root of the forward in log-value, inside a factor of
+        three of its default.</p>
+        <div class="table-wrap"><table class="fit">
+          <thead><tr><th>Parameter, PFT 1</th><th class="meaning">What it sets</th><th>Elasticity</th><th>Alone at its bound</th><th>GPP</th><th>Gap closed</th></tr></thead>
+          <tbody>
+            <tr><td>smpsc</td><td class="meaning">soil potential at full stomatal closure</td><td>+0.319</td><td>−255,000 → −765,000 mm</td><td>1.61</td><td>7.8 %</td></tr>
+            <tr><td>roota_par</td><td class="meaning">root profile, shallow term</td><td>−0.263</td><td>7 → 2.33</td><td>1.72</td><td>9.4 %</td></tr>
+            <tr><td>rootb_par</td><td class="meaning">root profile, deep term</td><td>−0.589</td><td>2 → 0.67</td><td>1.77</td><td>10.4 %</td></tr>
+            <tr><td>smpso</td><td class="meaning">soil potential where stress begins</td><td>+0.060</td><td>−66,000 → −198,000 mm</td><td>1.24</td><td>1.6 %</td></tr>
+            <tr class="total"><td>all four at bound</td><td class="meaning"></td><td></td><td></td><td>2.85</td><td>28.2 %</td></tr>
+          </tbody>
+        </table></div>
+        <p class="caption">Elasticity is d ln GPP / d ln |p| over the month. Every fit ended <span class="tag">AT BOUND</span>.</p>
+        <p>Two of the four are not inputs of any chained routine.
+        <code>roota_par</code> and <code>rootb_par</code> set the root fraction
+        once, at initialization, through the two-exponential profile of Zeng
+        (2001) as ELM spells it. The same expression was evaluated in JAX from
+        the recorded soil layers; it reproduces the recorded root fraction to
+        2·10⁻¹⁶, and the fit moves the parameters through it.</p>
+      </div>
+    </section>
+
+    <section class="chapter" id="s5">
+      <div class="ch-head">
+        <div class="ch-no">Section 5</div>
+        <h2>Then the Fortran model was asked</h2>
+      </div>
+      <div class="prose">
+        <p>A derivative of a translation is worth exactly what the original
+        model would say. The July window was rerun in ELM, from the same
+        restart, with the four values at their bounds written into the
+        parameter file.</p>
+        <div class="tiles">
+          <div class="chain"><div class="k">JAX chain, predicted</div><div class="v">2.849<small>gC m⁻² d⁻¹</small></div><div class="s">x2.49 of the baseline; a forward pass through 1,488 steps, 16 s</div></div>
+          <div class="model"><div class="k">ELM, rerun</div><div class="v">2.841<small>gC m⁻² d⁻¹</small></div><div class="s">x2.48 of the baseline; BTRAN 0.30 → 0.74, the soil-water trajectory moved with it</div></div>
+          <div><div class="k">Apart</div><div class="v">0.3<small>%</small></div><div class="s">on a four-parameter change that more than doubles the flux and reshapes the month's soil moisture</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="s6">
+      <div class="ch-head">
+        <div class="ch-no">Section 6</div>
+        <h2>What this shows, and what it does not</h2>
+      </div>
+      <div class="prose">
+        <p><strong>The derivative is the model's.</strong> Reverse mode through a
+        month of machine-translated ELM predicts the model's own response to a
+        large, coupled parameter change to a fraction of a percent. There is no
+        emulator to train and nothing to retrain when the Fortran changes: the
+        translation is regenerated and gated.</p>
+        <p><strong>The calibration answered honestly.</strong> Blodgett's GPP
+        shortfall is not in the water-stress parameters. Inside plausible
+        ranges, all four together close 28&nbsp;% of the gap, and the model
+        confirms it. What remains is structural: the soil column's depth and
+        water holding, the forcing's precipitation, the prescribed leaf area.
+        That is a finding about ELM at this site, reached in one reverse pass
+        and one three-minute rerun.</p>
+        <div class="note note-honest">
+          <span class="note-tag">What it does not claim</span>
+          <p>One monthly tower value determines one parameter; the quartet at
+          its bounds is an envelope, not a fit. The chain carries the water and
+          energy path; radiation and phenology still come from the recording.
+          A month at one site is a demonstration, not a calibration of ELM.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="s7">
+      <div class="ch-head">
+        <div class="ch-no">Section 7</div>
+        <h2>Method</h2>
+      </div>
+      <div class="prose">
+        <p>ELM at E3SM <code>e508436e</code>, single point on the US-Blo
+        surface data, satellite phenology, GSWP3 forcing through the coupler
+        bypass, twelve months of spin-up from 2003-07-01. The recorder dumps
+        every argument of seven routines on every step of July 2004: 
+        CanopyHydrology, CanopyFluxes, SoilTemperature, SoilFluxes, the
+        driver's patch-to-column averaging, HydrologyNoDrainage,
+        HydrologyDrainage. The chain carries 731 edges the flow audit found
+        unchanged on every step and reads 84 from the recording.</p>
+        <p>Observation: FLUXNET2015 monthly GPP as distributed by ILAMB, site
+        US-Blo, 2004-07, 7.202 ± 0.590 gC m⁻² d⁻¹. Bounds: a factor of three
+        either side of the parameter file's value, the rule used where no
+        audited range exists. The model rerun: the window continued from the
+        same restart with a copy of the parameter file, July FPSN read from
+        the history tape.</p>
+        <p class="caption">The chain and the fit live in the ELM case
+        repository (<code>case/water_path/chain.py</code>,
+        <code>chain_fit.py</code>, <code>case/us_blo_gswp3/rerun_window.sh</code>);
+        the translation, gates and JAX runtime are RecastEngine.</p>
+      </div>
+      <div class="ch-nav">
+        <a class="prev" href="index.html#e3sm">← Back to<b>E3SM Case</b></a>
+        <a class="next" href="index.html#engine">The engine<b>RecastEngine</b></a>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer class="footer">
+  <p>Recasting scientific software: LLM agents discover, grow, correct and backstop deterministic rules for software modernization.</p>
+  <p class="small"><a href="https://github.com/a85tract/SciRecast">Repository</a> · <a href="https://github.com/a85tract/RecastEngine">RecastEngine</a> · Apache License 2.0</p>
+</footer>
+
+<script src="assets/js/site.js"></script>
+<script>
+(function(){
+  var D = {"chain_start": [1.8943, 1.906, 2.0252, 2.0649, 1.3044, 1.3153, 1.2574, 1.4617, 1.3682, 1.2198, 0.944, 0.8081, 0.9918, 1.1642, 0.9095, 0.8567, 0.9705, 1.3036, 1.2769, 0.8705, 0.6835, 0.7469, 0.7388, 0.8818, 0.7132, 0.7836, 0.9253, 1.1184, 1.2075, 0.8587, 0.8664], "chain_all4": [4.8006, 4.8219, 4.7027, 4.7298, 3.4096, 3.4159, 3.2909, 3.7235, 3.4998, 3.1193, 2.4668, 2.02, 2.4626, 2.8541, 2.2624, 2.148, 2.433, 3.2048, 3.077, 2.1718, 1.7275, 1.8847, 1.8734, 2.1915, 1.8094, 2.0081, 2.3106, 2.7287, 2.9484, 2.1084, 2.1197], "model_base": [1.8906999826431274, 1.8990000486373901, 2.027600049972534, 2.0739998817443848, 1.3242000341415405, 1.3174999952316284, 1.2544000148773193, 1.4592000246047974, 1.3710999488830566, 1.23580002784729, 0.9531000256538391, 0.8047000169754028, 0.9947999715805054, 1.1588000059127808, 0.9168000221252441, 0.8547000288963318, 0.9592000246047974, 1.2969000339508057, 1.2782000303268433, 0.8912000060081482, 0.6836000084877014, 0.7455000281333923, 0.7411999702453613, 0.8798999786376953, 0.7156999707221985, 0.782800018787384, 0.9193000197410583, 1.1088999509811401, 1.2174999713897705, 0.8680999875068665, 0.8623999953269958], "model_all4": [4.642199993133545, 4.818600177764893, 4.703400135040283, 4.734000205993652, 3.45770001411438, 3.4137001037597656, 3.2781999111175537, 3.712899923324585, 3.5046000480651855, 3.15310001373291, 2.4842000007629395, 2.0251998901367188, 2.485300064086914, 2.8378000259399414, 2.272599935531616, 2.1314001083374023, 2.394399881362915, 3.177299976348877, 3.0669000148773193, 2.2091000080108643, 1.7166999578475952, 1.8625999689102173, 1.8655999898910522, 2.173099994659424, 1.7996000051498413, 1.9842000007629395, 2.277600049972534, 2.6923999786376953, 2.9611001014709473, 2.124000072479248, 2.106600046157837], "btran_base": [0.3474999964237213, 0.3443000018596649, 0.3400000035762787, 0.33489999175071716, 0.33000001311302185, 0.32679998874664307, 0.3240000009536743, 0.32109999656677246, 0.3190000057220459, 0.31709998846054077, 0.31529998779296875, 0.31360000371932983, 0.31139999628067017, 0.3093000054359436, 0.3073999881744385, 0.305400013923645, 0.30320000648498535, 0.30090001225471497, 0.2980000078678131, 0.29499998688697815, 0.2922999858856201, 0.2897000014781952, 0.28690001368522644, 0.2840000092983246, 0.2808000147342682, 0.2777999937534332, 0.2745000123977661, 0.27160000801086426, 0.26910001039505005, 0.2667999863624573, 0.2653999924659729], "btran_all4": [0.9071999788284302, 0.9045000076293945, 0.887499988079071, 0.8687999844551086, 0.8496999740600586, 0.8335999846458435, 0.8187000155448914, 0.8041999936103821, 0.7918000221252441, 0.7806000113487244, 0.7705000042915344, 0.7616999745368958, 0.7527999877929688, 0.7445999979972839, 0.7372999787330627, 0.730400025844574, 0.723800003528595, 0.7172999978065491, 0.708299994468689, 0.6992999911308289, 0.6909999847412109, 0.6833999752998352, 0.6757000088691711, 0.667900025844574, 0.6600000262260437, 0.652400016784668, 0.6448000073432922, 0.6377000212669373, 0.6312999725341797, 0.6251000165939331, 0.6205000281333923]};
+  var svg = document.getElementById('chart'), tip = document.getElementById('tip');
+  if (!svg) return;
+  var W = 1000, H = 400;
+  var panels = [
+    {title:'Baseline parameters', model:D.model_base, chain:D.chain_start, bt:D.btran_base, x0:58, x1:496},
+    {title:'All four water parameters at their bounds', model:D.model_all4, chain:D.chain_all4, bt:D.btran_all4, x0:556, x1:984}
+  ];
+  var top = 48, bottom = H - 44, ymax = 8;
+  function y(v){ return bottom - v / ymax * (bottom - top); }
+  var ns = 'http://www.w3.org/2000/svg';
+  function el(t, a, txt){ var e = document.createElementNS(ns, t); for (var k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; }
+  function mean(a){ var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return s / a.length; }
+  var obs = 7.202, sig = 0.59;
+  panels.forEach(function(p, pi){
+    function x(i){ return p.x0 + i / 30 * (p.x1 - p.x0); }
+    for (var v = 0; v <= ymax; v += 2) {
+      svg.appendChild(el('line', {x1:p.x0, x2:p.x1, y1:y(v), y2:y(v), 'class':'grid'}));
+      if (pi === 0) svg.appendChild(el('text', {x:p.x0 - 8, y:y(v) + 4, 'text-anchor':'end'}, String(v)));
+    }
+    svg.appendChild(el('rect', {x:p.x0, y:y(obs + sig), width:p.x1 - p.x0, height:y(obs - sig) - y(obs + sig), fill:'var(--sel)'}));
+    svg.appendChild(el('line', {x1:p.x0, x2:p.x1, y1:y(obs), y2:y(obs), stroke:'var(--ink3)', 'stroke-width':1.5, 'stroke-dasharray':'5 4'}));
+    svg.appendChild(el('text', {x:p.x1 - 4, y:y(obs) - 7, 'text-anchor':'end', 'class':'lbl'}, 'tower 7.20'));
+    svg.appendChild(el('line', {x1:p.x0, x2:p.x1, y1:bottom, y2:bottom, 'class':'axis'}));
+    [1, 8, 15, 22, 29].forEach(function(d){ svg.appendChild(el('text', {x:x(d - 1), y:bottom + 18, 'text-anchor':'middle'}, 'Jul ' + d)); });
+    svg.appendChild(el('text', {x:p.x0, y:24, 'class':'title'}, p.title));
+    svg.appendChild(el('text', {x:p.x1, y:24, 'text-anchor':'end'}, 'means  ELM ' + mean(p.model).toFixed(3) + '  chain ' + mean(p.chain).toFixed(3)));
+    function path(arr, color, w){ var d = ''; for (var i = 0; i < arr.length; i++) d += (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(arr[i]).toFixed(1) + ' '; svg.appendChild(el('path', {d:d, fill:'none', stroke:color, 'stroke-width':w, 'stroke-linejoin':'round', 'stroke-linecap':'round'})); }
+    path(p.model, 'var(--cz)', 3.2);
+    path(p.chain, 'var(--cx)', 2);
+    var hover = el('rect', {x:p.x0, y:top, width:p.x1 - p.x0, height:bottom - top, fill:'transparent'});
+    var cross = el('line', {x1:0, x2:0, y1:top, y2:bottom, stroke:'var(--ink3)', 'stroke-width':1, 'stroke-dasharray':'2 3', visibility:'hidden'});
+    var dotM = el('circle', {r:4.5, fill:'var(--cz)', stroke:'var(--bg2)', 'stroke-width':2, visibility:'hidden'});
+    var dotC = el('circle', {r:4.5, fill:'var(--cx)', stroke:'var(--bg2)', 'stroke-width':2, visibility:'hidden'});
+    svg.appendChild(cross); svg.appendChild(dotM); svg.appendChild(dotC); svg.appendChild(hover);
+    hover.addEventListener('mousemove', function(ev){
+      var r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) * W / r.width;
+      var i = Math.max(0, Math.min(30, Math.round((sx - p.x0) / (p.x1 - p.x0) * 30)));
+      cross.setAttribute('x1', x(i)); cross.setAttribute('x2', x(i)); cross.setAttribute('visibility', 'visible');
+      dotM.setAttribute('cx', x(i)); dotM.setAttribute('cy', y(p.model[i])); dotM.setAttribute('visibility', 'visible');
+      dotC.setAttribute('cx', x(i)); dotC.setAttribute('cy', y(p.chain[i])); dotC.setAttribute('visibility', 'visible');
+      tip.innerHTML = '<b>July ' + (i + 1) + '</b><br>ELM ' + p.model[i].toFixed(3) + '<br>chain ' + p.chain[i].toFixed(3) + '<br>BTRAN ' + p.bt[i].toFixed(2);
+      tip.style.display = 'block';
+      var fw = svg.parentElement.getBoundingClientRect();
+      var left = ev.clientX - fw.left + 14, tp = ev.clientY - fw.top - 10;
+      if (left + 150 > fw.width) left -= 170;
+      tip.style.left = left + 'px'; tip.style.top = tp + 'px';
+    });
+    hover.addEventListener('mouseleave', function(){ tip.style.display = 'none'; [cross, dotM, dotC].forEach(function(e){ e.setAttribute('visibility', 'hidden'); }); });
+  });
+  svg.appendChild(el('text', {x:14, y:top - 12, 'class':'lbl'}, 'gC m⁻² d⁻¹'));
+})();
+</script>
+</body>
+</html>

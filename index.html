@@ -87,7 +87,8 @@
     <p class="rail-title">Contents</p>
     <a href="#engine"><span class="n">1</span>RecastEngine</a>
     <a href="#cesm"><span class="n">2</span>CESM Case</a>
-    <a href="#contribute"><span class="n">3</span>How to Contribute</a>
+    <a href="#e3sm"><span class="n">3</span>E3SM Case</a>
+    <a href="#contribute"><span class="n">4</span>How to Contribute</a>
   </nav>
   <main>
     <details class="toc-mobile">
@@ -95,7 +96,8 @@
       <nav>
         <a href="#engine"><span class="n">1</span>RecastEngine</a>
         <a href="#cesm"><span class="n">2</span>CESM Case</a>
-        <a href="#contribute"><span class="n">3</span>How to Contribute</a>
+        <a href="#e3sm"><span class="n">3</span>E3SM Case</a>
+        <a href="#contribute"><span class="n">4</span>How to Contribute</a>
       </nav>
     </details>
 
@@ -177,6 +179,32 @@
     </section>
 
     <!-- ============================ 3 ============================ -->
+    <section class="chapter" id="e3sm">
+      <div class="ch-head">
+        <h2>E3SM Case</h2>
+        <p class="ch-lede">
+          The Energy Exascale Earth System Model, starting with its land
+          model, ELM. Here the engine's translation is used for what a
+          Fortran model cannot do on its own: a derivative through time.
+        </p>
+      </div>
+
+      <div class="prose">
+        <ul>
+          <li>
+            <strong><a href="elm-blodgett.html">ELM at Blodgett</a>.</strong>
+            A month of ELM, translated to JAX by the engine, chained through
+            July 2004 at the Blodgett Forest flux tower and differentiated
+            backwards through all 1,488 half-hourly steps. The derivative was
+            fitted to the tower's GPP; the untouched Fortran model, rerun with
+            the fitted parameters, agreed with the prediction to 0.3&nbsp;%.
+          </li>
+        </ul>
+      </div>
+
+    </section>
+
+    <!-- ============================ 4 ============================ -->
     <section class="chapter" id="contribute">
       <div class="ch-head">
         <h2>How to Contribute</h2>
